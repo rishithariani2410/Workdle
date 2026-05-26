@@ -74,15 +74,17 @@ html,body{background:#f0efe9;min-height:100vh}
 .app{min-height:100vh;background:#f0efe9;font-family:'DM Sans',sans-serif;color:#111}
 
 /* HEADER */
-.hdr{background:#111;color:#f0efe9;display:flex;align-items:center;gap:20px;padding:0 28px;height:56px;position:sticky;top:0;z-index:100}
+.hdr{background:#111;color:#f0efe9;display:flex;flex-direction:column;padding:10px 16px 0;position:sticky;top:0;z-index:100}
+.hdr-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
 .logo{font-family:'Instrument Serif',serif;font-size:21px;letter-spacing:-0.3px;flex-shrink:0}
 .logo em{font-style:italic;color:#a3e635}
 .sep{width:1px;height:18px;background:rgba(255,255,255,0.15);flex-shrink:0}
-.tabs{display:flex;gap:2px}
-.tab{padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;transition:all .15s;letter-spacing:.1px}
+.hdr-right{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:.5px}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;transition:all .15s}
 .tab:hover{color:rgba(255,255,255,0.75)}
-.tab.on{background:rgba(255,255,255,0.1);color:#fff}
-.hdr-right{margin-left:auto;font-family:'DM Mono',monospace;font-size:10.5px;color:rgba(255,255,255,0.28);letter-spacing:.5px}
+.tab.on{background:rgba(255,255,255,0.12);color:#fff}
 
 /* BODY */
 .body{max-width:980px;margin:0 auto;padding:36px 20px 80px}
@@ -316,14 +318,16 @@ export default function App() {
 
       {/* HEADER */}
       <header className="hdr">
-        <div className="logo">Work<em>dle</em></div>
-        <div className="sep"/>
+        <div className="hdr-top">
+          <div className="logo">Work<em>dle</em></div>
+          <div className="sep"/>
+          <div className="hdr-right">FEB – MAY 2026 · {allDays.length} DAYS</div>
+        </div>
         <nav className="tabs">
           {[["year","Year"],["month","Month"],["daily","Daily"],["games","Games"],["trends","Trends"]].map(([v,l])=>(
             <button key={v} className={`tab ${tab===v?"on":""}`} onClick={()=>setTab(v)}>{l}</button>
           ))}
         </nav>
-        <div className="hdr-right">FEB – MAY 2026 · {allDays.length} DAYS</div>
       </header>
 
       <div className="body">
