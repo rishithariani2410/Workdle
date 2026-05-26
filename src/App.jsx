@@ -1,297 +1,279 @@
 import { useState, useMemo } from "react";
 
-// ─── SEED DATA (90 days, 25 Feb – 25 May 2026) ───────────────────────────────
-const SEED_DATA=[{"date":"2023-01-26","ranks":{"Wordle":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-01-27","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-01-28","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-01-29","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Andy":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-01-30","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-01-31","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-01","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-02","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-03","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-04","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Andy":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-05","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-06","ranks":{"Wordle":{"Nick":1,"Yan":2,"Rishi":2,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-07","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-08","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-09","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-10","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-11","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-12","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-13","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Nick":3,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-14","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-15","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-16","ranks":{"Wordle":{"Nick":1,"Yan":2,"Andy":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-17","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-18","ranks":{"Wordle":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-19","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-20","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-21","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-22","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-23","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-24","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-25","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-26","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-27","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-02-28","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-01","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-02","ranks":{"Wordle":{"Yan":1,"Nick":2,"Rishi":2,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-03","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Yan":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-04","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-05","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-06","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-07","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-08","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-09","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-10","ranks":{"Wordle":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-11","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":5,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-12","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-13","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Nick":3,"Andy":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-14","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-15","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-16","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-17","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-18","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-19","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Nick":3,"Yan":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-20","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-21","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Nick":3,"Andy":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-22","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-23","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-24","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-25","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-26","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-27","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-28","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-29","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-30","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-03-31","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Andy":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-01","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":3,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-02","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-03","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-04","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-05","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Andy":3,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-06","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-07","ranks":{"Wordle":{"Nick":1,"Yan":2,"Andy":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-08","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-09","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-10","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-11","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-12","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-13","ranks":{"Wordle":{"Rishi":1,"Yan":2,"Nick":5,"Andy":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-14","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-15","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-16","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-17","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-18","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-19","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-20","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-21","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-22","ranks":{"Wordle":{"Nick":1,"Yan":2,"Andy":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-23","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Yan":3,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-24","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-25","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-26","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":3,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-27","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-28","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-29","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-04-30","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-01","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Nick":3,"Andy":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-02","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-03","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-04","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-05","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-06","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-07","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-09","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-10","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-11","ranks":{"Wordle":{"Andy":1,"Yan":2,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-12","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-13","ranks":{"Wordle":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-14","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-15","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-16","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":1,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-17","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":1,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-18","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":1,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-19","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-20","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-21","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-22","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-23","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-24","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Yan":3,"Andy":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-25","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-26","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-27","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-28","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-29","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Yan":3,"Nick":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-30","ranks":{"Wordle":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-05-31","ranks":{"Wordle":{"Yan":1,"Nick":5,"Andy":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-01","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-04","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-05","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-06","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-07","ranks":{"Wordle":{"Andy":1,"Yan":2,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-08","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-09","ranks":{"Wordle":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-10","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-12","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-13","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-14","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-15","ranks":{"Wordle":{"Nick":1,"Yan":2,"Andy":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-16","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-17","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-18","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-19","ranks":{"Wordle":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-20","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-21","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-22","ranks":{"Wordle":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-23","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-24","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-25","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2023-06-26","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2025-02-05","ranks":{"Wordle":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Rishi":1,"Nick":5,"Andy":5,"Yan":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2025-04-29","ranks":{"Wordle":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2025-05-22","ranks":{"Wordle":{"Yan":1,"Nick":5,"Andy":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2025-08-02","ranks":{"Wordle":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Connections":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Tango":{"Rishi":1,"Nick":5,"Andy":5,"Yan":5},"Queens":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Pinpoint":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2026-02-26","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Queens":{"Nick":1,"Rishi":2,"Yan":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-02-27","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5},"Connections":{"Yan":1,"Nick":2,"Andy":3,"Rishi":5},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-02-28","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Andy":3,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Nick":1,"Rishi":2,"Yan":3,"Andy":4},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4}}},{"date":"2026-03-01","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":4},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4},"Tango":{"Nick":1,"Andy":2,"Yan":3,"Rishi":5},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":5},"Pinpoint":{"Nick":1,"Andy":1,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2026-03-02","ranks":{"Wordle":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Connections":{"Andy":1,"Yan":2,"Nick":3,"Rishi":3},"Tango":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Queens":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-03-03","ranks":{"Wordle":{"Nick":1,"Yan":2,"Andy":3,"Rishi":5},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":3,"Yan":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5}}},{"date":"2026-03-04","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":4},"Tango":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-03-05","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-03-06","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":5},"Connections":{"Nick":1,"Yan":2,"Andy":5,"Rishi":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":4},"Pinpoint":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":1,"Nick":3,"Yan":4}}},{"date":"2026-03-07","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Tango":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}},{"date":"2026-03-08","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5}}},{"date":"2026-03-09","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":4},"Connections":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Tango":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Queens":{"Andy":1,"Yan":2,"Nick":3,"Rishi":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5}}},{"date":"2026-03-10","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Andy":1,"Nick":2,"Yan":3,"Rishi":5},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-03-11","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":3},"Connections":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":2,"Yan":3,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4}}},{"date":"2026-03-12","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":3,"Rishi":3},"Connections":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4}}},{"date":"2026-03-13","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4}}},{"date":"2026-03-14","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Pinpoint":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4}}},{"date":"2026-03-15","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Connections":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-03-16","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":3,"Rishi":3},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Yan":2,"Rishi":2,"Nick":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":1,"Nick":3,"Andy":4}}},{"date":"2026-03-17","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":3},"Connections":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Tango":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Queens":{"Rishi":1,"Yan":2,"Nick":3,"Andy":3},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4}}},{"date":"2026-03-18","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":5},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Nick":1,"Yan":2,"Rishi":2,"Andy":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Yan":2,"Nick":3,"Rishi":3},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5}}},{"date":"2026-03-19","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Yan":2,"Rishi":3,"Nick":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Patches":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-03-20","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Pinpoint":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4}}},{"date":"2026-03-21","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Pinpoint":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5}}},{"date":"2026-03-22","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-03-23","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":4},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4}}},{"date":"2026-03-24","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":3},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Patches":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-03-25","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":3},"Connections":{"Nick":1,"Rishi":1,"Andy":5,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}},{"date":"2026-03-26","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-03-27","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Connections":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Pinpoint":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Patches":{"Nick":1,"Andy":1,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-03-28","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Connections":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Yan":2,"Nick":3,"Rishi":3},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-03-29","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5}}},{"date":"2026-03-30","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Queens":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4},"Pinpoint":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5}}},{"date":"2026-03-31","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4}}},{"date":"2026-04-01","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-04-02","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":4}}},{"date":"2026-04-03","ranks":{"Wordle":{"Nick":1,"Andy":2,"Rishi":2,"Yan":4},"Connections":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Queens":{"Nick":1,"Yan":2,"Andy":3,"Rishi":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Yan":2,"Andy":3,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4}}},{"date":"2026-04-04","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Zip":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5}}},{"date":"2026-04-05","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5}}},{"date":"2026-04-06","ranks":{"Wordle":{"Andy":1,"Yan":2,"Rishi":2,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5}}},{"date":"2026-04-07","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":1,"Nick":3,"Andy":4}}},{"date":"2026-04-08","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4}}},{"date":"2026-04-09","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Connections":{"Rishi":1,"Nick":5,"Andy":5,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":5},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Zip":{"Yan":1,"Nick":2,"Rishi":3,"Andy":5}}},{"date":"2026-04-10","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Tango":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Yan":3,"Andy":5},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5}}},{"date":"2026-04-11","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Connections":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Pinpoint":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-04-12","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4}}},{"date":"2026-04-13","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Yan":1,"Rishi":1,"Nick":3,"Andy":5}}},{"date":"2026-04-14","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Queens":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Pinpoint":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Zip":{"Yan":1,"Andy":2,"Rishi":2,"Nick":5}}},{"date":"2026-04-15","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Nick":1,"Andy":2,"Yan":3,"Rishi":4},"Queens":{"Nick":1,"Yan":1,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4}}},{"date":"2026-04-16","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Yan":1,"Andy":2,"Nick":3,"Rishi":3},"Tango":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":3,"Yan":3},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Yan":2,"Rishi":3,"Andy":5}}},{"date":"2026-04-17","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Nick":2,"Yan":3,"Rishi":5},"Pinpoint":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Patches":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Zip":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4}}},{"date":"2026-04-18","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Patches":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-04-19","ranks":{"Wordle":{"Yan":1,"Nick":2,"Rishi":2,"Andy":4},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}},{"date":"2026-04-20","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Andy":1,"Nick":2,"Yan":3,"Rishi":3},"Queens":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Patches":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Zip":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4}}},{"date":"2026-04-21","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Pinpoint":{"Andy":1,"Rishi":2,"Nick":3,"Yan":3},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Andy":1,"Rishi":1,"Yan":3,"Nick":4}}},{"date":"2026-04-22","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Connections":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4}}},{"date":"2026-04-23","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Yan":3,"Nick":5},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Andy":1,"Rishi":1,"Yan":3,"Nick":5},"Queens":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Rishi":2,"Yan":3,"Nick":5},"Patches":{"Yan":1,"Andy":2,"Rishi":3,"Nick":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5}}},{"date":"2026-04-24","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":3},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Patches":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-04-25","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5}}},{"date":"2026-04-26","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-04-27","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Yan":1,"Rishi":2,"Nick":3,"Andy":3},"Patches":{"Yan":1,"Rishi":1,"Andy":3,"Nick":5},"Zip":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4}}},{"date":"2026-04-28","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Yan":1,"Rishi":3,"Nick":5},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":5},"Queens":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Yan":3,"Nick":5},"Zip":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5}}},{"date":"2026-04-29","ranks":{"Wordle":{"Yan":1,"Nick":2,"Rishi":2,"Andy":4},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Nick":1,"Rishi":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Patches":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Zip":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4}}},{"date":"2026-04-30","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Yan":1,"Rishi":1,"Andy":3,"Nick":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":5},"Queens":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Zip":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4}}},{"date":"2026-05-01","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5},"Patches":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Zip":{"Rishi":1,"Nick":5,"Andy":5,"Yan":5}}},{"date":"2026-05-02","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Connections":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Queens":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Pinpoint":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Patches":{"Nick":1,"Yan":2,"Rishi":3,"Andy":5},"Zip":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4}}},{"date":"2026-05-03","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-05-04","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-05-05","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":4},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-05-06","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5}}},{"date":"2026-05-07","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5}}},{"date":"2026-05-08","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Connections":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-05-09","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5}}},{"date":"2026-05-10","ranks":{"Wordle":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5}}},{"date":"2026-05-11","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4}}},{"date":"2026-05-12","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Patches":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Zip":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4}}},{"date":"2026-05-13","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Andy":1,"Yan":2,"Rishi":2,"Nick":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-05-14","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Connections":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-05-15","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":3},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-05-16","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":3},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Zip":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4}}},{"date":"2026-05-17","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-05-18","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Connections":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":4},"Patches":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Zip":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4}}},{"date":"2026-05-19","ranks":{"Wordle":{"Rishi":1,"Yan":2,"Nick":3,"Andy":3},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4},"Queens":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-05-20","ranks":{"Wordle":{"Nick":1,"Yan":2,"Rishi":2,"Andy":4},"Connections":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Zip":{"Nick":1,"Rishi":2,"Yan":3,"Andy":4}}},{"date":"2026-05-21","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Yan":1,"Rishi":1,"Andy":3,"Nick":4}}},{"date":"2026-05-22","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Rishi":1,"Andy":2,"Nick":3,"Yan":3},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-05-23","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Nick":1,"Yan":2,"Andy":3,"Rishi":4},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Queens":{"Nick":1,"Andy":2,"Yan":3,"Rishi":4},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4}}},{"date":"2026-05-24","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Connections":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Tango":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5}}},{"date":"2026-05-25","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}}];
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const SEED_DATA=[{"date":"2026-03-01","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":4},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4},"Tango":{"Nick":1,"Andy":2,"Yan":3,"Rishi":5},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":5},"Pinpoint":{"Nick":1,"Andy":1,"Yan":5,"Rishi":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5}}},{"date":"2026-03-02","ranks":{"Wordle":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Connections":{"Andy":1,"Yan":2,"Nick":3,"Rishi":3},"Tango":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Queens":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-03-03","ranks":{"Wordle":{"Nick":1,"Yan":2,"Andy":3,"Rishi":5},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":3,"Yan":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5}}},{"date":"2026-03-04","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":4},"Tango":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-03-05","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-03-06","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":5},"Connections":{"Nick":1,"Yan":2,"Andy":5,"Rishi":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":4},"Pinpoint":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":1,"Nick":3,"Yan":4}}},{"date":"2026-03-07","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Tango":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}},{"date":"2026-03-08","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5}}},{"date":"2026-03-09","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":4},"Connections":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Tango":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Queens":{"Andy":1,"Yan":2,"Nick":3,"Rishi":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Andy":2,"Nick":3,"Rishi":5}}},{"date":"2026-03-10","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":2,"Rishi":5},"Connections":{"Andy":1,"Nick":2,"Yan":3,"Rishi":5},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-03-11","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":3},"Connections":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":2,"Yan":3,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4}}},{"date":"2026-03-12","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":3,"Rishi":3},"Connections":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4}}},{"date":"2026-03-13","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4}}},{"date":"2026-03-14","ranks":{"Wordle":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Pinpoint":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4}}},{"date":"2026-03-15","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Connections":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-03-16","ranks":{"Wordle":{"Yan":1,"Nick":2,"Andy":3,"Rishi":3},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Yan":2,"Rishi":2,"Nick":4},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":1,"Nick":3,"Andy":4}}},{"date":"2026-03-17","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":3},"Connections":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Tango":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Queens":{"Rishi":1,"Yan":2,"Nick":3,"Andy":3},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4}}},{"date":"2026-03-18","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":5},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Nick":1,"Yan":2,"Rishi":2,"Andy":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Yan":2,"Nick":3,"Rishi":3},"Patches":{"Nick":5,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5}}},{"date":"2026-03-19","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Yan":2,"Rishi":3,"Nick":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Patches":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-03-20","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Pinpoint":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4}}},{"date":"2026-03-21","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Pinpoint":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5}}},{"date":"2026-03-22","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-03-23","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":4},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4}}},{"date":"2026-03-24","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":3},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Patches":{"Nick":1,"Andy":5,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-03-25","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":3,"Yan":3},"Connections":{"Nick":1,"Rishi":1,"Andy":5,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}},{"date":"2026-03-26","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-03-27","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Connections":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Pinpoint":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Patches":{"Nick":1,"Andy":1,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-03-28","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Connections":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Yan":2,"Nick":3,"Rishi":3},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-03-29","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5}}},{"date":"2026-03-30","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Queens":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4},"Pinpoint":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5}}},{"date":"2026-03-31","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Patches":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4}}},{"date":"2026-04-01","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-04-02","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":4}}},{"date":"2026-04-03","ranks":{"Wordle":{"Nick":1,"Andy":2,"Rishi":2,"Yan":4},"Connections":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Queens":{"Nick":1,"Yan":2,"Andy":3,"Rishi":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Yan":2,"Andy":3,"Rishi":5},"Zip":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4}}},{"date":"2026-04-04","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Zip":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5}}},{"date":"2026-04-05","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5}}},{"date":"2026-04-06","ranks":{"Wordle":{"Andy":1,"Yan":2,"Rishi":2,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5}}},{"date":"2026-04-07","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Rishi":1,"Nick":3,"Andy":4}}},{"date":"2026-04-08","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Connections":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4}}},{"date":"2026-04-09","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Connections":{"Rishi":1,"Nick":5,"Andy":5,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":5},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Zip":{"Yan":1,"Nick":2,"Rishi":3,"Andy":5}}},{"date":"2026-04-10","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Yan":1,"Nick":2,"Andy":2,"Rishi":2},"Tango":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Yan":3,"Andy":5},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5}}},{"date":"2026-04-11","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Connections":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Pinpoint":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-04-12","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Andy":1,"Nick":2,"Yan":5,"Rishi":5},"Zip":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4}}},{"date":"2026-04-13","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Yan":1,"Rishi":1,"Nick":3,"Andy":5}}},{"date":"2026-04-14","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Queens":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Pinpoint":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":5,"Yan":5},"Zip":{"Yan":1,"Andy":2,"Rishi":2,"Nick":5}}},{"date":"2026-04-15","ranks":{"Wordle":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Nick":1,"Andy":2,"Yan":3,"Rishi":4},"Queens":{"Nick":1,"Yan":1,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4}}},{"date":"2026-04-16","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Yan":1,"Andy":2,"Nick":3,"Rishi":3},"Tango":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Queens":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":3,"Yan":3},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Yan":2,"Rishi":3,"Andy":5}}},{"date":"2026-04-17","ranks":{"Wordle":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Nick":2,"Yan":3,"Rishi":5},"Pinpoint":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Patches":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Zip":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4}}},{"date":"2026-04-18","ranks":{"Wordle":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4},"Connections":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Patches":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-04-19","ranks":{"Wordle":{"Yan":1,"Nick":2,"Rishi":2,"Andy":4},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}},{"date":"2026-04-20","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Andy":1,"Nick":2,"Yan":3,"Rishi":3},"Queens":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":4},"Patches":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Zip":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4}}},{"date":"2026-04-21","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Pinpoint":{"Andy":1,"Rishi":2,"Nick":3,"Yan":3},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Andy":1,"Rishi":1,"Yan":3,"Nick":4}}},{"date":"2026-04-22","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":3},"Connections":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4}}},{"date":"2026-04-23","ranks":{"Wordle":{"Andy":1,"Rishi":2,"Yan":3,"Nick":5},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Andy":1,"Rishi":1,"Yan":3,"Nick":5},"Queens":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Rishi":2,"Yan":3,"Nick":5},"Patches":{"Yan":1,"Andy":2,"Rishi":3,"Nick":5},"Zip":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5}}},{"date":"2026-04-24","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":3},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Patches":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-04-25","ranks":{"Wordle":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":5},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5}}},{"date":"2026-04-26","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-04-27","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Yan":1,"Rishi":2,"Nick":3,"Andy":3},"Patches":{"Yan":1,"Rishi":1,"Andy":3,"Nick":5},"Zip":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4}}},{"date":"2026-04-28","ranks":{"Wordle":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4},"Connections":{"Andy":1,"Yan":1,"Rishi":3,"Nick":5},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":5},"Queens":{"Yan":1,"Rishi":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Yan":3,"Nick":5},"Zip":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5}}},{"date":"2026-04-29","ranks":{"Wordle":{"Yan":1,"Nick":2,"Rishi":2,"Andy":4},"Connections":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Tango":{"Nick":1,"Rishi":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Patches":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Zip":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4}}},{"date":"2026-04-30","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Yan":1,"Rishi":1,"Andy":3,"Nick":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":5},"Queens":{"Yan":1,"Andy":2,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Zip":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4}}},{"date":"2026-05-01","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Nick":5,"Yan":5,"Rishi":5},"Patches":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Zip":{"Rishi":1,"Nick":5,"Andy":5,"Yan":5}}},{"date":"2026-05-02","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Connections":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Queens":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Pinpoint":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Patches":{"Nick":1,"Yan":2,"Rishi":3,"Andy":5},"Zip":{"Yan":1,"Andy":2,"Rishi":2,"Nick":4}}},{"date":"2026-05-03","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Yan":5,"Rishi":5},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-05-04","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Rishi":1,"Andy":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-05-05","ranks":{"Wordle":{"Andy":1,"Rishi":1,"Nick":3,"Yan":4},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4}}},{"date":"2026-05-06","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Nick":2,"Andy":3,"Rishi":4},"Pinpoint":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5}}},{"date":"2026-05-07","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Pinpoint":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5}}},{"date":"2026-05-08","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Connections":{"Rishi":1,"Nick":2,"Andy":2,"Yan":2},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Andy":1,"Yan":2,"Rishi":3,"Nick":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-05-09","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":2,"Yan":5}}},{"date":"2026-05-10","ranks":{"Wordle":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5}}},{"date":"2026-05-11","ranks":{"Wordle":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Connections":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Yan":3,"Andy":4},"Queens":{"Yan":1,"Rishi":1,"Nick":3,"Andy":3},"Pinpoint":{"Andy":1,"Nick":2,"Yan":2,"Rishi":2},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Yan":2,"Nick":4}}},{"date":"2026-05-12","ranks":{"Wordle":{"Rishi":1,"Nick":2,"Yan":2,"Andy":4},"Connections":{"Andy":1,"Rishi":2,"Nick":5,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Patches":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Zip":{"Andy":1,"Nick":2,"Rishi":2,"Yan":4}}},{"date":"2026-05-13","ranks":{"Wordle":{"Andy":1,"Nick":2,"Yan":3,"Rishi":4},"Connections":{"Nick":1,"Andy":1,"Yan":1,"Rishi":1},"Tango":{"Andy":1,"Yan":2,"Rishi":2,"Nick":4},"Queens":{"Rishi":1,"Yan":2,"Andy":3,"Nick":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":3},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-05-14","ranks":{"Wordle":{"Andy":1,"Yan":1,"Nick":3,"Rishi":3},"Connections":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-05-15","ranks":{"Wordle":{"Nick":1,"Andy":1,"Yan":3,"Rishi":3},"Connections":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Tango":{"Yan":1,"Rishi":2,"Andy":3,"Nick":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Zip":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5}}},{"date":"2026-05-16","ranks":{"Wordle":{"Yan":1,"Andy":2,"Nick":3,"Rishi":3},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4},"Queens":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Andy":1,"Yan":2,"Rishi":3,"Nick":4},"Zip":{"Andy":1,"Yan":2,"Nick":3,"Rishi":4}}},{"date":"2026-05-17","ranks":{"Wordle":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Queens":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5},"Patches":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Zip":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5}}},{"date":"2026-05-18","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":2},"Connections":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":4},"Queens":{"Yan":1,"Rishi":2,"Nick":3,"Andy":4},"Pinpoint":{"Rishi":1,"Nick":2,"Andy":2,"Yan":4},"Patches":{"Andy":1,"Yan":1,"Rishi":3,"Nick":4},"Zip":{"Rishi":1,"Andy":2,"Yan":3,"Nick":4}}},{"date":"2026-05-19","ranks":{"Wordle":{"Rishi":1,"Yan":2,"Nick":3,"Andy":3},"Connections":{"Andy":1,"Rishi":1,"Nick":5,"Yan":5},"Tango":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4},"Queens":{"Nick":1,"Yan":1,"Andy":3,"Rishi":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":4},"Zip":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4}}},{"date":"2026-05-20","ranks":{"Wordle":{"Nick":1,"Yan":2,"Rishi":2,"Andy":4},"Connections":{"Yan":1,"Andy":2,"Nick":3,"Rishi":4},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Andy":1,"Nick":2,"Rishi":3,"Yan":4},"Pinpoint":{"Yan":1,"Nick":2,"Andy":2,"Rishi":4},"Patches":{"Rishi":1,"Yan":2,"Andy":3,"Nick":4},"Zip":{"Nick":1,"Rishi":2,"Yan":3,"Andy":4}}},{"date":"2026-05-21","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Nick":1,"Andy":1,"Rishi":1,"Yan":5},"Tango":{"Rishi":1,"Yan":2,"Nick":3,"Andy":4},"Queens":{"Yan":1,"Nick":2,"Rishi":3,"Andy":4},"Pinpoint":{"Nick":1,"Andy":1,"Yan":1,"Rishi":4},"Patches":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Zip":{"Yan":1,"Rishi":1,"Andy":3,"Nick":4}}},{"date":"2026-05-22","ranks":{"Wordle":{"Nick":1,"Yan":1,"Rishi":1,"Andy":4},"Connections":{"Rishi":1,"Andy":2,"Nick":3,"Yan":3},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Pinpoint":{"Andy":1,"Nick":2,"Rishi":2,"Yan":5},"Patches":{"Nick":1,"Rishi":2,"Andy":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5}}},{"date":"2026-05-23","ranks":{"Wordle":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Connections":{"Nick":1,"Yan":2,"Andy":3,"Rishi":4},"Tango":{"Andy":1,"Rishi":2,"Yan":3,"Nick":4},"Queens":{"Nick":1,"Andy":2,"Yan":3,"Rishi":4},"Pinpoint":{"Nick":1,"Andy":2,"Rishi":2,"Yan":5},"Patches":{"Rishi":1,"Nick":2,"Andy":3,"Yan":5},"Zip":{"Nick":1,"Yan":2,"Rishi":3,"Andy":4}}},{"date":"2026-05-24","ranks":{"Wordle":{"Nick":1,"Rishi":1,"Yan":3,"Andy":4},"Connections":{"Nick":1,"Andy":2,"Yan":2,"Rishi":4},"Tango":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Queens":{"Nick":1,"Andy":2,"Rishi":3,"Yan":5},"Pinpoint":{"Nick":1,"Rishi":2,"Andy":5,"Yan":5},"Patches":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Zip":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5}}},{"date":"2026-05-25","ranks":{"Wordle":{"Andy":1,"Yan":1,"Rishi":1,"Nick":4},"Connections":{"Andy":1,"Rishi":1,"Nick":3,"Yan":5},"Tango":{"Rishi":1,"Andy":2,"Nick":3,"Yan":5},"Queens":{"Rishi":1,"Nick":2,"Andy":5,"Yan":5},"Pinpoint":{"Nick":1,"Andy":1,"Rishi":3,"Yan":5},"Patches":{"Andy":1,"Rishi":2,"Nick":3,"Yan":5},"Zip":{"Andy":1,"Nick":2,"Rishi":3,"Yan":5}}}];
 
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
 const PLAYERS = ["Nick","Andy","Yan","Rishi"];
-const LEADERBOARD_GAMES = ["Wordle","Connections","Tango","Queens","Pinpoint"];
-const ALL_GAMES          = ["Wordle","Connections","Tango","Queens","Pinpoint","Patches","Zip"];
+const LB_GAMES = ["Wordle","Connections","Tango","Queens","Pinpoint"];
+const ALL_GAMES = ["Wordle","Connections","Tango","Queens","Pinpoint","Patches","Zip"];
 const DEFAULT_RANK = 5;
+const GAME_COLOR = {Wordle:"#4ade80",Connections:"#60a5fa",Tango:"#a78bfa",Queens:"#34d399",Pinpoint:"#fbbf24",Patches:"#f472b6",Zip:"#fb923c"};
+const GAME_ABBR  = {Wordle:"W",Connections:"C",Tango:"T",Queens:"Q",Pinpoint:"Pt",Patches:"Pa",Zip:"Z"};
+const P_COLOR    = {Nick:"#ef4444",Andy:"#3b82f6",Yan:"#8b5cf6",Rishi:"#f59e0b"};
+const P_INIT     = {Nick:"NW",Andy:"AS",Yan:"YJ",Rishi:"R"};
 
-const GAME_META = {
-  Wordle:      { abbr:"W",  color:"#4ade80", unit:"guesses"  },
-  Connections: { abbr:"C",  color:"#60a5fa", unit:"mistakes" },
-  Tango:       { abbr:"T",  color:"#a78bfa", unit:"secs"     },
-  Queens:      { abbr:"Q",  color:"#34d399", unit:"secs"     },
-  Pinpoint:    { abbr:"Pt", color:"#fbbf24", unit:"guesses"  },
-  Patches:     { abbr:"Pa", color:"#f472b6", unit:"secs"     },
-  Zip:         { abbr:"Z",  color:"#fb923c", unit:"secs"     },
-};
-
-const PLAYER_META = {
-  Nick:  { color:"#ef4444", initials:"NW" },
-  Andy:  { color:"#3b82f6", initials:"AS" },
-  Yan:   { color:"#8b5cf6", initials:"YJ" },
-  Rishi: { color:"#f59e0b", initials:"R"  },
-};
-
-const MONTH_NAMES = {
-  "2023-01":"Jan 2023","2023-02":"Feb 2023","2023-03":"Mar 2023","2023-04":"Apr 2023",
-  "2023-05":"May 2023","2023-06":"Jun 2023","2023-07":"Jul 2023","2023-08":"Aug 2023",
-  "2023-09":"Sep 2023","2023-10":"Oct 2023","2023-11":"Nov 2023","2023-12":"Dec 2023",
-  "2025-04":"Apr 2025","2025-05":"May 2025","2025-08":"Aug 2025",
-  "2026-02":"Feb 2026","2026-03":"Mar 2026","2026-04":"Apr 2026","2026-05":"May 2026"
-};
-
-// ─── LOGIC ────────────────────────────────────────────────────────────────────
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 function rankTotals(totals) {
-  const sorted = [...PLAYERS].sort((a,b) => totals[a]-totals[b]);
-  const out = {};
-  let i = 0;
-  while (i < sorted.length) {
-    let j = i;
-    while (j < sorted.length-1 && totals[sorted[j+1]] === totals[sorted[i]]) j++;
-    for (let k=i;k<=j;k++) out[sorted[k]] = i+1;
-    i = j+1;
+  const sorted = [...PLAYERS].sort((a,b)=>totals[a]-totals[b]);
+  const out={};
+  let i=0;
+  while(i<sorted.length){
+    let j=i;
+    while(j<sorted.length-1 && totals[sorted[j+1]]===totals[sorted[i]]) j++;
+    for(let k=i;k<=j;k++) out[sorted[k]]=i+1;
+    i=j+1;
   }
   return out;
 }
 
-function computeTotals(dayRanks, games) {
-  const totals = {};
-  PLAYERS.forEach(p => {
-    totals[p] = games.reduce((s,g) => s + (dayRanks[g]?.[p] ?? DEFAULT_RANK), 0);
+function computeTotals(ranks, games) {
+  const totals={};
+  PLAYERS.forEach(p=>{ totals[p]=games.reduce((s,g)=>s+(ranks[g]?.[p]??DEFAULT_RANK),0); });
+  return {totals, dayRanks:rankTotals(totals)};
+}
+
+function standings(days, games) {
+  const pts={},wins={};
+  PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;});
+  days.forEach(d=>{
+    const {totals,dayRanks}=computeTotals(d.ranks,games);
+    PLAYERS.forEach(p=>pts[p]+=totals[p]);
+    PLAYERS.filter(p=>dayRanks[p]===1).forEach(p=>wins[p]++);
   });
-  return { totals, dayRanks: rankTotals(totals) };
-}
-function formatScore(game, val) {
-  if (val==null) return "—";
-  if (game==="Wordle")      return val===7?"X/6":`${val}/6`;
-  if (game==="Connections") return val===4?"✓":`+${val-4}`;
-  if (game==="Pinpoint")    return val===6?"Fail":`${val}`;
-  const m=Math.floor(val/60), s=val%60;
-  return m>0?`${m}:${String(s).padStart(2,"0")}`:`0:${String(s).padStart(2,"0")}`;
+  const sorted=[...PLAYERS].sort((a,b)=>pts[a]-pts[b]);
+  return {pts,wins,sorted,ranks:rankTotals(pts)};
 }
 
-function dateLabel(iso) {
-  const d = new Date(iso+"T12:00:00Z");
-  return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+function gamePts(days, game) {
+  const pts={};
+  PLAYERS.forEach(p=>pts[p]=0);
+  days.forEach(d=>PLAYERS.forEach(p=>pts[p]+=(d.ranks[game]?.[p]??DEFAULT_RANK)));
+  return {pts,sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b])};
 }
 
-// ─── CSS ─────────────────────────────────────────────────────────────────────
-const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
+function fmtDate(iso) {
+  return new Date(iso+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+}
+
+function fmtMonth(ym) {
+  const [y,m]=ym.split("-");
+  return new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"short",year:"numeric"});
+}
+
+// ─── CSS ──────────────────────────────────────────────────────────────────────
+const CSS=`
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#f0efe9;min-height:100vh}
-.app{min-height:100vh;background:#f0efe9;font-family:'DM Sans',sans-serif;color:#111}
+.app{min-height:100vh;background:#f0efe9;font-family:'DM Sans',sans-serif;color:#111;font-size:14px}
 
 /* HEADER */
-.hdr{background:#111;color:#f0efe9;display:flex;flex-direction:column;padding:10px 16px 0;position:sticky;top:0;z-index:100}
-.hdr-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.logo{font-family:'Instrument Serif',serif;font-size:21px;letter-spacing:-0.3px;flex-shrink:0}
+.hdr{background:#111;color:#f0efe9;padding:12px 16px 0;position:sticky;top:0;z-index:100}
+.hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.logo{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.3px}
 .logo em{font-style:italic;color:#a3e635}
-.sep{width:1px;height:18px;background:rgba(255,255,255,0.15);flex-shrink:0}
-.hdr-right{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:.5px}
-.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
+.hdr-sub{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:.5px;text-align:right}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;gap:2px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;transition:all .15s}
-.tab:hover{color:rgba(255,255,255,0.75)}
+.tab{flex-shrink:0;padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;transition:all .15s}
 .tab.on{background:rgba(255,255,255,0.12);color:#fff}
 
 /* BODY */
-.body{max-width:980px;margin:0 auto;padding:36px 20px 80px}
-.eyebrow{font-size:10.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:#999;margin-bottom:14px}
-.section{margin-bottom:40px}
+.body{max-width:600px;margin:0 auto;padding:24px 14px 80px}
+.section{margin-bottom:32px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#aaa;margin-bottom:12px}
 
-/* STANDING CARDS */
-.s-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.s-card{background:#fff;border-radius:14px;padding:18px 16px;border:1.5px solid #e5e3dc;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;cursor:default}
-.s-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}
+/* FILTER BAR */
+.filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:20px}
+.filters::-webkit-scrollbar{display:none}
+.filt{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #e5e3dc;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#777;transition:all .15s;font-family:'DM Sans',sans-serif}
+.filt.on{background:#111;color:#f0efe9;border-color:#111}
+
+/* STANDING CARDS — 2 col on mobile */
+.s-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.s-card{background:#fff;border-radius:14px;padding:16px;border:1.5px solid #e5e3dc;transition:box-shadow .15s}
 .s-card.gold{background:#111;border-color:#111;color:#f0efe9}
-.s-rank{font-family:'Instrument Serif',serif;font-size:52px;line-height:1;color:#ece9e0;margin-bottom:8px}
+.s-rank{font-family:'Instrument Serif',serif;font-size:44px;line-height:1;color:#ece9e0;margin-bottom:6px}
 .s-card.gold .s-rank{color:rgba(255,255,255,.1)}
-.s-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin-bottom:8px;font-family:'DM Mono',monospace}
-.s-name{font-size:15px;font-weight:600;margin-bottom:2px}
-.s-pts{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;line-height:1}
-.s-label{font-size:10.5px;color:#aaa;letter-spacing:.4px;margin-top:3px}
-.s-card.gold .s-label{color:rgba(255,255,255,.35)}
-.s-sub{font-size:11.5px;color:#999;margin-top:8px}
-.s-card.gold .s-sub{color:rgba(255,255,255,.4)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;font-family:'DM Mono',monospace;margin-bottom:6px}
+.s-name{font-size:14px;font-weight:700;margin-bottom:1px}
+.s-pts{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;line-height:1;margin-top:4px}
 .s-card.gold .s-pts{color:#a3e635}
+.s-label{font-size:10px;color:#aaa;margin-top:2px}
+.s-card.gold .s-label{color:rgba(255,255,255,.35)}
+.s-wins{font-size:11px;color:#999;margin-top:6px}
+.s-card.gold .s-wins{color:rgba(255,255,255,.4)}
 
-/* MINI GAME LEADERBOARD */
-.g-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.g-mini{background:#fff;border-radius:12px;padding:14px;border:1.5px solid #e5e3dc}
-.g-mini-hdr{display:flex;align-items:center;gap:7px;margin-bottom:10px}
-.chip{font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;padding:2px 6px;border-radius:4px;color:#fff;letter-spacing:.5px;flex-shrink:0}
-.g-mini-name{font-size:12.5px;font-weight:600}
-.g-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid #f2efe8;font-size:12.5px}
+/* GAME MINI — 2 col */
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g-card{background:#fff;border-radius:12px;padding:12px;border:1.5px solid #e5e3dc}
+.g-hdr{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.chip{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;color:#fff}
+.g-name{font-size:12px;font-weight:700}
+.g-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f2efe8;font-size:12px}
 .g-row:last-child{border-bottom:none}
-.g-num{font-family:'DM Mono',monospace;font-size:10.5px;color:#bbb;width:14px}
+.g-num{font-family:'DM Mono',monospace;font-size:10px;color:#ccc;width:12px}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.g-player{font-weight:500;flex:1}
-.g-pts{font-family:'DM Mono',monospace;font-size:11.5px;color:#777}
+.g-player{font-weight:600;flex:1}
+.g-pts{font-family:'DM Mono',monospace;font-size:11px;color:#999}
 
-/* MONTH TABS */
-.m-tabs{display:flex;gap:6px;margin-bottom:24px}
-.m-tab{padding:7px 16px;border-radius:8px;border:1.5px solid #e5e3dc;background:#fff;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;color:#777;transition:all .15s}
-.m-tab:hover{border-color:#111;color:#111}
-.m-tab.on{background:#111;color:#f0efe9;border-color:#111}
-
-/* DAY TABLE */
-.day-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:28px;scrollbar-width:none}
-.day-scroll::-webkit-scrollbar{display:none}
-.d-btn{flex-shrink:0;padding:7px 14px;border-radius:8px;border:1.5px solid #e5e3dc;background:#fff;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;color:#777;transition:all .15s;white-space:nowrap}
-.d-btn:hover{border-color:#111;color:#111}
-.d-btn.on{background:#111;color:#f0efe9;border-color:#111}
+/* TABLE */
+.tbl{background:#fff;border-radius:14px;border:1.5px solid #e5e3dc;overflow:hidden;margin-bottom:12px}
+.tbl-hdr{display:grid;background:#f7f5f0;border-bottom:1.5px solid #e5e3dc;padding:9px 12px;align-items:center}
+.tbl-row{display:grid;padding:11px 12px;border-bottom:1px solid #f2efe8;align-items:center}
+.tbl-row:hover{background:#faf9f7}
+.tbl-row:last-child{border-bottom:none}
+.tbl-label{font-size:9.5px;font-weight:700;color:#bbb;letter-spacing:1px;text-transform:uppercase}
+.tbl-p-hdr{display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:#bbb;letter-spacing:1px;text-transform:uppercase}
+.game-cell{display:flex;align-items:center;gap:6px;font-weight:700;font-size:12px}
+.rb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-family:'DM Mono',monospace;font-size:11px;font-weight:700}
+.rb1{background:#111;color:#a3e635}
+.rb2{background:#e8f5e9;color:#2e7d32}
+.rb3{background:#fff8e1;color:#f57f17}
+.rb4{background:#fce4ec;color:#c62828}
+.rb5{background:#f5f5f5;color:#ccc}
 
 /* DAY SUMMARY */
-.day-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
-.dc{background:#fff;border-radius:12px;padding:16px;border:1.5px solid #e5e3dc;text-align:center}
+.day-sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.dc{background:#fff;border-radius:12px;padding:14px;border:1.5px solid #e5e3dc;text-align:center}
 .dc.gold{background:#111;color:#f0efe9;border-color:#111}
-.dc-rank{font-family:'Instrument Serif',serif;font-size:36px;line-height:1;color:#ece9e0;margin-bottom:6px}
+.dc-rank{font-family:'Instrument Serif',serif;font-size:32px;line-height:1;color:#ece9e0;margin-bottom:4px}
 .dc.gold .dc-rank{color:rgba(255,255,255,.1)}
-.dc-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;margin:0 auto 6px;font-family:'DM Mono',monospace}
-.dc-name{font-size:13.5px;font-weight:600;margin-bottom:4px}
-.dc-total{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:#111}
-.dc.gold .dc-total{color:#a3e635}
-.dc-sub{font-size:11px;color:#aaa;margin-top:2px}
-.dc.gold .dc-sub{color:rgba(255,255,255,.35)}
-
-/* GAME TABLE */
-.tbl{background:#fff;border-radius:14px;border:1.5px solid #e5e3dc;overflow:hidden;margin-bottom:10px}
-.tbl-hdr{display:grid;background:#f7f5f0;border-bottom:1.5px solid #e5e3dc;padding:9px 16px}
-.tbl-row{display:grid;padding:11px 16px;border-bottom:1px solid #f2efe8;align-items:center;transition:background .1s}
-.tbl-row:hover{background:#faf9f6}
-.tbl-row:last-child{border-bottom:none}
-.tbl-cols-day{grid-template-columns:130px repeat(4,1fr)}
-.tbl-cols-game{grid-template-columns:110px repeat(4,1fr)}
-.tbl-cell{font-size:12.5px}
-.tbl-hdr-cell{font-size:10.5px;font-weight:600;color:#aaa;letter-spacing:1px;text-transform:uppercase}
-.tbl-hdr-player{display:flex;align-items:center;gap:5px}
-.game-name-cell{display:flex;align-items:center;gap:7px;font-weight:600;font-size:12.5px}
-
-/* RANK BADGE */
-.rb{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;flex-shrink:0}
-.rb1{background:#111;color:#a3e635}
-.rb2{background:#ece9e0;color:#777}
-.rb3{background:#ece9e0;color:#999}
-.rb4{background:#ece9e0;color:#bbb}
-.rb5{background:#fef2f2;color:#fca5a5}
-.score-tiny{font-family:'DM Mono',monospace;font-size:10.5px;color:#aaa;margin-left:3px}
-
-/* TOGGLE */
-.tog{padding:6px 13px;border-radius:8px;border:1.5px solid #e5e3dc;background:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:#777;transition:all .15s}
-.tog:hover{border-color:#111;color:#111}
-.tog.on{background:#111;color:#f0efe9;border-color:#111}
-
-/* GAME PILLS */
-.pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px}
-.pill{padding:6px 15px;border-radius:999px;border:1.5px solid #e5e3dc;background:#fff;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;color:#777;transition:all .15s}
-.pill:hover{border-color:#111;color:#111}
-.pill.on{background:#111;color:#f0efe9;border-color:#111}
+.dc-name{font-size:13px;font-weight:700;margin:4px 0 2px}
+.dc-pts{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:#111}
+.dc.gold .dc-pts{color:#a3e635}
+.dc-sub{font-size:10px;color:#aaa;margin-top:2px}
+.dc.gold .dc-sub{color:rgba(255,255,255,.3)}
 
 /* DETAIL TABLE */
 .det-tbl{background:#fff;border-radius:14px;border:1.5px solid #e5e3dc;overflow:hidden}
-.det-row{display:grid;grid-template-columns:100px repeat(4,1fr);padding:10px 16px;border-bottom:1px solid #f2efe8;align-items:center}
+.det-row{display:grid;grid-template-columns:68px repeat(4,1fr);padding:9px 12px;border-bottom:1px solid #f2efe8;align-items:center}
 .det-row:last-child{border-bottom:none}
 .det-row.hdr{background:#f7f5f0;border-bottom:1.5px solid #e5e3dc}
-.det-date{font-family:'DM Mono',monospace;font-size:11px;color:#aaa}
-.det-cell{display:flex;align-items:center;gap:5px}
-.det-score{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#555}
-.det-miss{color:#fca5a5}
+.det-date{font-family:'DM Mono',monospace;font-size:10px;color:#aaa}
+.det-cell{display:flex;align-items:center;gap:4px}
+.det-score{font-family:'DM Mono',monospace;font-size:11px;color:#888}
 .det-win{color:#111;font-weight:700}
+.det-miss{color:#ddd}
 
-/* CHART */
-.chart-wrap{background:#fff;border-radius:14px;border:1.5px solid #e5e3dc;padding:20px 16px 8px;margin-bottom:14px}
-.chart-title{font-size:13px;font-weight:600;margin-bottom:16px;color:#111}
-.chart-sub{font-size:11px;color:#999;margin-top:2px;font-weight:400}
-
-/* RESPONSIVE */
-@media(max-width:700px){
-  .s-grid,.g-grid{grid-template-columns:repeat(2,1fr)}
-  .g-grid{grid-template-columns:repeat(2,1fr)}
-  .day-sum{grid-template-columns:repeat(2,1fr)}
-  .tbl-cols-day,.tbl-cols-game{grid-template-columns:90px repeat(4,1fr)}
-  .det-row{grid-template-columns:70px repeat(4,1fr)}
-}
+/* TRENDS */
+.form-row{display:grid;align-items:center;padding:5px 10px;border-bottom:1px solid #f2efe8}
+.form-row:last-child{border-bottom:none}
+.form-cell{border-radius:5px;text-align:center;padding:5px 2px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace}
+.heat-row{display:grid;align-items:center;padding:6px 10px;border-bottom:1px solid #f2efe8}
+.heat-row:last-child{border-bottom:none}
+.heat-cell{border-radius:7px;text-align:center;padding:6px 3px}
+.heat-val{font-size:13px;font-weight:700;font-family:'DM Mono',monospace}
+.heat-sub{font-size:8px;opacity:.6;margin-top:1px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#888}
+.leg-dot{width:11px;height:11px;border-radius:3px}
 `;
 
-// ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [tab, setTab]     = useState("year");
-  const [month, setMonth] = useState("2026-05");
-  const [selDay, setDay]  = useState(null);
-  const [selGame, setGame]= useState("Wordle");
-  const [showRaw, setRaw] = useState(false);
+  const [tab,setTab]       = useState("year");
+  const [yearFilt,setYear] = useState("all");
+  const [month,setMonth]   = useState("2026-05");
+  const [selDay,setDay]    = useState(null);
+  const [selGame,setGame]  = useState("Wordle");
 
-  // Pre-compute all days with both leaderboard games and all games
-  const allDays = useMemo(() => SEED_DATA.map(d => ({
+  const allDays = useMemo(()=>SEED_DATA.map(d=>({
     ...d,
-    lb:  computeTotals(d.ranks, LEADERBOARD_GAMES),
-    all: computeTotals(d.ranks, ALL_GAMES),
-  })), []);
+    lb: computeTotals(d.ranks, LB_GAMES),
+    all:computeTotals(d.ranks, ALL_GAMES),
+  })),[]);
 
-  // Months
-  const months = useMemo(() => [...new Set(SEED_DATA.map(d=>d.date.slice(0,7)))].sort(), []);
+  const years = useMemo(()=>["all",...[...new Set(SEED_DATA.map(d=>d['date'].slice(0,4)))].sort()]  ,[]);
+  const months= useMemo(()=>[...new Set(SEED_DATA.map(d=>d['date'].slice(0,7)))].sort(),[]);
 
-  // Year standings (leaderboard games only)
-  const yearStats = useMemo(() => {
-    const pts={}, wins={};
-    PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;});
-    allDays.forEach(dr=>{
-      PLAYERS.forEach(p=>pts[p]+=dr.lb.totals[p]);
-      PLAYERS.filter(p=>dr.lb.dayRanks[p]===1).forEach(p=>wins[p]++);
-    });
-    return { pts, wins, sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b]), ranks:rankTotals(pts) };
-  }, [allDays]);
-
-  // Month standings
-  const monthStats = useMemo(() => {
-    const mDays = allDays.filter(d=>d.date.startsWith(month));
-    const pts={}, wins={};
-    PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;});
-    mDays.forEach(dr=>{
-      PLAYERS.forEach(p=>pts[p]+=dr.lb.totals[p]);
-      PLAYERS.filter(p=>dr.lb.dayRanks[p]===1).forEach(p=>wins[p]++);
-    });
-    return { pts, wins, sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b]), ranks:rankTotals(pts), days:mDays.length };
-  }, [allDays, month]);
-
-  // Per-game leaderboard (year, leaderboard games)
-  const gameLeaders = useMemo(() => {
+  // Year tab: filtered days
+  const yearDays = useMemo(()=>yearFilt==="all"?allDays:allDays.filter(d=>d.date.startsWith(yearFilt)),[allDays,yearFilt]);
+  const yearStats= useMemo(()=>standings(yearDays,LB_GAMES),[yearDays]);
+  const yearGameStats=useMemo(()=>{
     const out={};
-    LEADERBOARD_GAMES.forEach(g=>{
-      const pts={}; PLAYERS.forEach(p=>pts[p]=0);
-      allDays.forEach(d=>{
-        const r=d.ranks[g];
-        PLAYERS.forEach(p=>pts[p]+=(r[p]||DEFAULT_RANK));
-      });
-      out[g]={pts,sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b])};
-    });
+    LB_GAMES.forEach(g=>{out[g]=gamePts(yearDays,g);});
     return out;
-  }, [allDays]);
+  },[yearDays]);
 
-  // Days in selected month (for daily tab)
+  // Daily tab
   const monthDays = useMemo(()=>allDays.filter(d=>d.date.startsWith(month)),[allDays,month]);
-  const selDayData = selDay!=null ? monthDays[selDay] : monthDays[monthDays.length-1];
+  const selDayData= selDay!=null?monthDays[selDay]:monthDays[monthDays.length-1];
+  const daySorted = selDayData?[...PLAYERS].sort((a,b)=>selDayData.all.totals[a]-selDayData.all.totals[b]):[];
 
-  // Sorted day for display in daily tab
-  const daySorted = selDayData ? [...PLAYERS].sort((a,b)=>selDayData.all.totals[a]-selDayData.all.totals[b]) : [];
+  // Games tab
+  const gameAllTime = useMemo(()=>gamePts(allDays,selGame),[allDays,selGame]);
 
-  const RB = ({rank}) => <span className={`rb rb${rank}`}>{rank===5?"–":rank}</span>;
-  const Av = ({p,size=32}) => (
-    <div className="s-av" style={{width:size,height:size,background:PLAYER_META[p].color,fontSize:size<28?9.5:11}}>
-      {PLAYER_META[p].initials}
-    </div>
+  // Trends
+  const FORM_DAYS=14;
+  const recentDays=useMemo(()=>allDays.slice(-FORM_DAYS),[allDays]);
+  const heatmap=useMemo(()=>{
+    const h={};
+    PLAYERS.forEach(p=>{h[p]={};
+      LB_GAMES.forEach(g=>{
+        const vals=allDays.map(d=>d.ranks[g]?.[p]??DEFAULT_RANK);
+        h[p][g]=parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2));
+      });
+    });
+    return h;
+  },[allDays]);
+
+  const rankColor=avg=>{
+    if(avg<=1.8) return{bg:"#dcfce7",tx:"#166534"};
+    if(avg<=2.5) return{bg:"#fef9c3",tx:"#854d0e"};
+    if(avg<=3.2) return{bg:"#ffedd5",tx:"#9a3412"};
+    return{bg:"#fee2e2",tx:"#991b1b"};
+  };
+  const formColor=r=>{
+    if(r===1) return{bg:"#111",tx:"#a3e635"};
+    if(r===2) return{bg:"#dcfce7",tx:"#166534"};
+    if(r===3) return{bg:"#fef9c3",tx:"#854d0e"};
+    if(r===4) return{bg:"#fee2e2",tx:"#991b1b"};
+    return{bg:"#f5f5f5",tx:"#ccc"};
+  };
+
+  const Av=({p,sz=32})=>(
+    <div className="av" style={{width:sz,height:sz,background:P_COLOR[p],fontSize:sz<28?9:10}}>{P_INIT[p]}</div>
   );
 
-  const StandingCards = ({sorted,pts,wins,ranks,label,days}) => (
+  const RB=({r})=><span className={`rb rb${r}`}>{r===5?"–":r}</span>;
+
+  const Cards=({st,label})=>(
     <div className="s-grid">
-      {sorted.map(p=>{
-        const rank=ranks[p];
+      {st.sorted.map(p=>{
+        const r=st.ranks[p];
         return(
-          <div key={p} className={`s-card ${rank===1?"gold":""}`}>
-            <div className="s-rank">{rank}</div>
-            <Av p={p} size={34}/>
+          <div key={p} className={`s-card ${r===1?"gold":""}`}>
+            <div className="s-rank">{r}</div>
+            <Av p={p} sz={32}/>
             <div className="s-name">{p}</div>
-            <div className="s-pts">{pts[p]}</div>
+            <div className="s-pts">{st.pts[p]}</div>
             <div className="s-label">{label}</div>
-            {wins && <div className="s-sub">{wins[p]} day win{wins[p]!==1?"s":""}</div>}
+            <div className="s-wins">{st.wins[p]} day win{st.wins[p]!==1?"s":""}</div>
           </div>
         );
       })}
+    </div>
+  );
+
+  const GameMinis=({gStats})=>(
+    <div className="g-grid">
+      {LB_GAMES.map(g=>(
+        <div key={g} className="g-card">
+          <div className="g-hdr">
+            <span className="chip" style={{background:GAME_COLOR[g]}}>{GAME_ABBR[g]}</span>
+            <span className="g-name">{g}</span>
+          </div>
+          {gStats[g].sorted.map((p,i)=>(
+            <div key={p} className="g-row">
+              <span className="g-num">{i+1}</span>
+              <div className="dot" style={{background:P_COLOR[p]}}/>
+              <span className="g-player">{p}</span>
+              <span className="g-pts">{gStats[g].pts[p]}</span>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 
@@ -299,15 +281,13 @@ export default function App() {
     <style>{CSS}</style>
     <div className="app">
 
-      {/* HEADER */}
       <header className="hdr">
         <div className="hdr-top">
           <div className="logo">Work<em>dle</em></div>
-          <div className="sep"/>
-          <div className="hdr-right">JAN 2023 – MAY 2026 · {allDays.length} DAYS</div>
+          <div className="hdr-sub">MAR – MAY 2026<br/>{allDays.length} DAYS</div>
         </div>
         <nav className="tabs">
-          {[["year","Year"],["month","Month"],["daily","Daily"],["games","Games"],["trends","Trends"]].map(([v,l])=>(
+          {[["year","🏆 Year"],["daily","📅 Daily"],["games","🎮 Games"],["trends","📊 Trends"]].map(([v,l])=>(
             <button key={v} className={`tab ${tab===v?"on":""}`} onClick={()=>setTab(v)}>{l}</button>
           ))}
         </nav>
@@ -317,332 +297,233 @@ export default function App() {
 
         {/* ══ YEAR ══════════════════════════════════════════════════════════ */}
         {tab==="year" && (<>
-          <div className="section">
-            <div className="eyebrow">Jan 2023 – May 2026 · {allDays.length} days · Wordle Connections Tango Queens Pinpoint</div>
-            <StandingCards sorted={yearStats.sorted} pts={yearStats.pts} wins={yearStats.wins} ranks={yearStats.ranks} label="pts total"/>
-          </div>
-          <div className="section">
-            <div className="eyebrow">Game rankings — year</div>
-            <div className="g-grid">
-              {LEADERBOARD_GAMES.map(g=>(
-                <div key={g} className="g-mini">
-                  <div className="g-mini-hdr">
-                    <span className="chip" style={{background:GAME_META[g].color}}>{GAME_META[g].abbr}</span>
-                    <span className="g-mini-name">{g}</span>
-                  </div>
-                  {gameLeaders[g].sorted.map((p,i)=>(
-                    <div key={p} className="g-row">
-                      <span className="g-num">{i+1}</span>
-                      <div className="dot" style={{background:PLAYER_META[p].color}}/>
-                      <span className="g-player">{p}</span>
-                      <span className="g-pts">{gameLeaders[g].pts[p]}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>)}
-
-        {/* ══ MONTH ═════════════════════════════════════════════════════════ */}
-        {tab==="month" && (<>
-          <div className="m-tabs">
-            {months.map(m=>(
-              <button key={m} className={`m-tab ${month===m?"on":""}`} onClick={()=>setMonth(m)}>
-                {MONTH_NAMES[m]||m}
+          {/* Year filter */}
+          <div className="filters">
+            {years.map(y=>(
+              <button key={y} className={`filt ${yearFilt===y?"on":""}`} onClick={()=>setYear(y)}>
+                {y==="all"?"All time":y}
               </button>
             ))}
           </div>
+
           <div className="section">
-            <div className="eyebrow">{MONTH_NAMES[month]} · {monthStats.days} days</div>
-            <StandingCards sorted={monthStats.sorted} pts={monthStats.pts} wins={monthStats.wins} ranks={monthStats.ranks} label="pts this month"/>
-          </div>
-          <div className="section">
-            <div className="eyebrow">Game rankings — {MONTH_NAMES[month]}</div>
-            <div className="g-grid">
-              {LEADERBOARD_GAMES.map(g=>{
-                const mDays=allDays.filter(d=>d.date.startsWith(month));
-                const pts={}; PLAYERS.forEach(p=>pts[p]=0);
-                mDays.forEach(d=>{ const r=d.ranks[g]; PLAYERS.forEach(p=>pts[p]+=(r[p]||DEFAULT_RANK)); });
-                const sorted=[...PLAYERS].sort((a,b)=>pts[a]-pts[b]);
-                return(
-                  <div key={g} className="g-mini">
-                    <div className="g-mini-hdr">
-                      <span className="chip" style={{background:GAME_META[g].color}}>{GAME_META[g].abbr}</span>
-                      <span className="g-mini-name">{g}</span>
-                    </div>
-                    {sorted.map((p,i)=>(
-                      <div key={p} className="g-row">
-                        <span className="g-num">{i+1}</span>
-                        <div className="dot" style={{background:PLAYER_META[p].color}}/>
-                        <span className="g-player">{p}</span>
-                        <span className="g-pts">{pts[p]}</span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
+            <div className="eyebrow">
+              {yearFilt==="all"?"All time":yearFilt} · {yearDays.length} days · Leaderboard games
             </div>
+            <Cards st={yearStats} label={yearFilt==="all"?"pts all time":`pts in ${yearFilt}`}/>
+          </div>
+
+          <div className="section">
+            <div className="eyebrow">Game rankings</div>
+            <GameMinis gStats={yearGameStats}/>
           </div>
         </>)}
 
         {/* ══ DAILY ═════════════════════════════════════════════════════════ */}
         {tab==="daily" && (<>
-          {/* Month selector */}
-          <div className="m-tabs">
-            {months.map(m=>(
-              <button key={m} className={`m-tab ${month===m?"on":""}`} onClick={()=>{setMonth(m);setDay(null);}}>
-                {MONTH_NAMES[m]||m}
+          {/* Month filter */}
+          <div className="filters">
+            {[...months].reverse().map(m=>(
+              <button key={m} className={`filt ${month===m?"on":""}`} onClick={()=>{setMonth(m);setDay(null);}}>
+                {fmtMonth(m)}
               </button>
             ))}
           </div>
-          {/* Day selector */}
-          <div className="day-scroll">
+
+          {/* Day filter */}
+          <div className="filters">
             {monthDays.map((d,i)=>(
-              <button key={d.date} className={`d-btn ${(selDay===i||(selDay===null&&i===monthDays.length-1))?"on":""}`}
+              <button key={d.date}
+                className={`filt ${(selDay===i||(selDay===null&&i===monthDays.length-1))?"on":""}`}
                 onClick={()=>setDay(i)}>
-                {dateLabel(d.date)}
+                {fmtDate(d.date)}
               </button>
             ))}
           </div>
 
           {selDayData && (<>
-            <div className="eyebrow">{dateLabel(selDayData.date)} · All 7 games (Wordle Connections Tango Queens Pinpoint Patches Zip)</div>
-            <div className="day-sum">
-              {daySorted.map(p=>{
-                const rank=selDayData.all.dayRanks[p];
-                return(
-                  <div key={p} className={`dc ${rank===1?"gold":""}`}>
-                    <div className="dc-rank">{rank}</div>
-                    <div className="dc-av" style={{width:30,height:30,background:PLAYER_META[p].color}}>{PLAYER_META[p].initials}</div>
-                    <div className="dc-name">{p}</div>
-                    <div className="dc-total">{selDayData.all.totals[p]}</div>
-                    <div className="dc-sub">pts · 7 games</div>
-                  </div>
-                );
-              })}
+            <div className="section">
+              <div className="eyebrow">{fmtDate(selDayData.date)} · all 7 games</div>
+              <div className="day-sum">
+                {daySorted.map(p=>{
+                  const r=selDayData.all.dayRanks[p];
+                  return(
+                    <div key={p} className={`dc ${r===1?"gold":""}`}>
+                      <div className="dc-rank">{r}</div>
+                      <Av p={p} sz={28}/>
+                      <div className="dc-name">{p}</div>
+                      <div className="dc-pts">{selDayData.all.totals[p]}</div>
+                      <div className="dc-sub">pts · 7 games</div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-              <div className="eyebrow" style={{margin:0}}>Game breakdown</div>
-
-            </div>
-
-            <div className="tbl">
-              <div className="tbl-hdr tbl-cols-day">
-                <div className="tbl-hdr-cell">Game</div>
-                {PLAYERS.map(p=>(
-                  <div key={p} className="tbl-hdr-cell tbl-hdr-player">
-                    <div style={{width:8,height:8,borderRadius:"50%",background:PLAYER_META[p].color}}/>
-                    {p}
+            <div className="section">
+              <div className="eyebrow">Game breakdown</div>
+              <div className="tbl">
+                <div className="tbl-hdr" style={{gridTemplateColumns:"110px repeat(4,1fr)"}}>
+                  <div className="tbl-label">Game</div>
+                  {PLAYERS.map(p=>(
+                    <div key={p} className="tbl-p-hdr">
+                      <div className="dot" style={{background:P_COLOR[p]}}/>
+                      {p}
+                    </div>
+                  ))}
+                </div>
+                {ALL_GAMES.map(game=>(
+                  <div key={game} className="tbl-row" style={{gridTemplateColumns:"110px repeat(4,1fr)"}}>
+                    <div className="game-cell">
+                      <span className="chip" style={{background:GAME_COLOR[game]}}>{GAME_ABBR[game]}</span>
+                      {game}
+                    </div>
+                    {PLAYERS.map(p=>(
+                      <div key={p}><RB r={selDayData.ranks[game]?.[p]??DEFAULT_RANK}/></div>
+                    ))}
                   </div>
                 ))}
               </div>
-              {ALL_GAMES.map(game=>(
-                <div key={game} className="tbl-row tbl-cols-day">
-                  <div className="game-name-cell">
-                    <span className="chip" style={{background:GAME_META[game].color,padding:"2px 5px",fontSize:"9px"}}>{GAME_META[game].abbr}</span>
-                    {game}
-                  </div>
-                  {PLAYERS.map(p=>{
-                    const rank=selDayData.ranks[game][p];
-                    return(
-                      <div key={p} className="tbl-cell" style={{display:"flex",alignItems:"center",gap:4}}>
-                        <RB rank={rank}/>
-
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
             </div>
           </>)}
         </>)}
 
         {/* ══ GAMES ═════════════════════════════════════════════════════════ */}
         {tab==="games" && (<>
-          <div className="pills">
+          <div className="filters">
             {ALL_GAMES.map(g=>(
-              <button key={g} className={`pill ${selGame===g?"on":""}`} onClick={()=>setGame(g)}>{g}</button>
+              <button key={g} className={`filt ${selGame===g?"on":""}`} onClick={()=>setGame(g)}>{g}</button>
             ))}
           </div>
 
-          {(()=>{
-            const pts={}; PLAYERS.forEach(p=>pts[p]=0);
-            allDays.forEach(d=>{
-              const r=d.ranks[selGame];
-              PLAYERS.forEach(p=>pts[p]+=(r[p]||DEFAULT_RANK));
-            });
-            const sorted=[...PLAYERS].sort((a,b)=>pts[a]-pts[b]);
-            const ranks=rankTotals(pts);
-            return(<>
-              <div className="eyebrow">{selGame} · season ranking</div>
-              <div className="s-grid" style={{marginBottom:32}}>
-                {sorted.map(p=>(
-                  <div key={p} className={`s-card ${ranks[p]===1?"gold":""}`}>
-                    <div className="s-rank">{ranks[p]}</div>
-                    <Av p={p} size={34}/>
+          <div className="section">
+            <div className="eyebrow">{selGame} · all time ranking</div>
+            <div className="s-grid">
+              {gameAllTime.sorted.map((p,i)=>{
+                const r=i+1;
+                return(
+                  <div key={p} className={`s-card ${r===1?"gold":""}`}>
+                    <div className="s-rank">{r}</div>
+                    <Av p={p} sz={32}/>
                     <div className="s-name">{p}</div>
-                    <div className="s-pts">{pts[p]}</div>
+                    <div className="s-pts">{gameAllTime.pts[p]}</div>
                     <div className="s-label">pts ({allDays.length} days)</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="section">
+            <div className="eyebrow">{selGame} · day by day</div>
+            <div className="det-tbl">
+              <div className="det-row hdr">
+                <div className="tbl-label">Date</div>
+                {PLAYERS.map(p=>(
+                  <div key={p} className="tbl-p-hdr">
+                    <div className="dot" style={{background:P_COLOR[p]}}/>
+                    {p}
                   </div>
                 ))}
               </div>
-              <div className="eyebrow">{selGame} · day-by-day</div>
-              <div className="det-tbl">
-                <div className="det-row hdr">
-                  <div className="tbl-hdr-cell">Date</div>
-                  {PLAYERS.map(p=>(
-                    <div key={p} className="tbl-hdr-cell tbl-hdr-player">
-                      <div style={{width:7,height:7,borderRadius:"50%",background:PLAYER_META[p].color}}/>
-                      {p}
-                    </div>
-                  ))}
-                </div>
-                {allDays.map(d=>{
-                  const gRanks=d.ranks[selGame];
-                  const minR=Math.min(...PLAYERS.map(p=>gRanks[p]||DEFAULT_RANK));
-                  return(
-                    <div key={d.date} className="det-row">
-                      <div className="det-date">{dateLabel(d.date)}</div>
-                      {PLAYERS.map(p=>{
-                        const rank=gRanks[p]||DEFAULT_RANK;
-                        const isW=rank===minR&&rank<5;
-                        return(
-                          <div key={p} className="det-cell">
-                            <RB rank={rank}/>
-                            <span className={`det-score ${rank===5?"det-miss":""} ${isW?"det-win":""}`}>
-                              {rank===5?"–":`#${rank}`}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
-            </>);
-          })()}
+              {allDays.map(d=>{
+                const gr=d.ranks[selGame];
+                const best=Math.min(...PLAYERS.map(p=>gr?.[p]??DEFAULT_RANK));
+                return(
+                  <div key={d.date} className="det-row">
+                    <div className="det-date">{fmtDate(d.date)}</div>
+                    {PLAYERS.map(p=>{
+                      const r=gr?.[p]??DEFAULT_RANK;
+                      return(
+                        <div key={p} className="det-cell">
+                          <RB r={r}/>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </>)}
 
         {/* ══ TRENDS ════════════════════════════════════════════════════════ */}
-        {tab==="trends" && (()=>{
-          const FORM_DAYS = 12;
-          const recentDays = allDays.slice(-FORM_DAYS);
-
-          // Heatmap: avg rank per player per game (leaderboard games)
-          const heatmap = {};
-          PLAYERS.forEach(p=>{
-            heatmap[p]={};
-            LEADERBOARD_GAMES.forEach(g=>{
-              const vals = allDays.map(d=>d.ranks[g]?.[p]||DEFAULT_RANK);
-              heatmap[p][g] = parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2));
-            });
-          });
-
-          // Colour scale: 1=best (green), 5=worst (red)
-          const rankColor = (avg) => {
-            // 1→green, 3→yellow, 5→red
-            if (avg <= 1.5) return {bg:"#dcfce7",text:"#166534"};
-            if (avg <= 2.2) return {bg:"#d1fae5",text:"#065f46"};
-            if (avg <= 2.8) return {bg:"#fef9c3",text:"#854d0e"};
-            if (avg <= 3.5) return {bg:"#ffedd5",text:"#9a3412"};
-            return {bg:"#fee2e2",text:"#991b1b"};
-          };
-
-          // Form colour per day rank
-          const formColor = (rank) => {
-            if (rank===1) return {bg:"#111",text:"#a3e635"};
-            if (rank===2) return {bg:"#e0f2fe",text:"#0369a1"};
-            if (rank===3) return {bg:"#fef9c3",text:"#854d0e"};
-            if (rank===4) return {bg:"#fee2e2",text:"#991b1b"};
-            return {bg:"#f4f4f4",text:"#aaa"};  // missed
-          };
-
-          return(<>
-            {/* ── FORM TABLE ── */}
-            <div className="eyebrow">Recent form · last {FORM_DAYS} days · overall daily rank</div>
-            <div className="tbl" style={{marginBottom:32}}>
-              {/* Header row - dates */}
-              <div style={{display:"grid",gridTemplateColumns:`56px repeat(${FORM_DAYS},1fr)`,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"8px 10px",gap:3}}>
-                <div className="tbl-hdr-cell"></div>
+        {tab==="trends" && (<>
+          <div className="section">
+            <div className="eyebrow">Recent form · last {FORM_DAYS} days · daily rank</div>
+            <div className="tbl">
+              <div className="form-row" style={{gridTemplateColumns:`52px repeat(${FORM_DAYS},1fr)`,gap:2,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"7px 10px"}}>
+                <div/>
                 {recentDays.map(d=>(
-                  <div key={d.date} style={{fontSize:8,fontWeight:600,color:"#bbb",textAlign:"center",letterSpacing:"0.3px",lineHeight:1.2}}>
-                    {dateLabel(d.date).replace(" ","\n")}
+                  <div key={d.date} style={{fontSize:8,color:"#ccc",textAlign:"center",fontWeight:600,lineHeight:1.3}}>
+                    {fmtDate(d.date).split(" ").map((x,i)=><div key={i}>{x}</div>)}
                   </div>
                 ))}
               </div>
-              {/* Player rows */}
               {PLAYERS.map(p=>(
-                <div key={p} style={{display:"grid",gridTemplateColumns:`56px repeat(${FORM_DAYS},1fr)`,padding:"5px 10px",borderBottom:"1px solid #f2efe8",alignItems:"center",gap:3}}>
-                  <div style={{display:"flex",alignItems:"center",gap:5,overflow:"hidden"}}>
-                    <div style={{width:7,height:7,borderRadius:"50%",background:PLAYER_META[p].color,flexShrink:0}}/>
-                    <span style={{fontSize:11,fontWeight:700,color:"#111",whiteSpace:"nowrap"}}>{p}</span>
+                <div key={p} className="form-row" style={{gridTemplateColumns:`52px repeat(${FORM_DAYS},1fr)`,gap:2,padding:"5px 10px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:4}}>
+                    <div className="dot" style={{background:P_COLOR[p]}}/>
+                    <span style={{fontSize:11,fontWeight:700}}>{p}</span>
                   </div>
                   {recentDays.map(d=>{
-                    const rank = d.lb.dayRanks[p] || DEFAULT_RANK;
-                    const c = formColor(rank);
+                    const r=d.lb.dayRanks[p]??DEFAULT_RANK;
+                    const c=formColor(r);
                     return(
-                      <div key={d.date} style={{background:c.bg,color:c.text,borderRadius:5,textAlign:"center",padding:"5px 1px",fontSize:11,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>
-                        {rank===5?"–":rank}
+                      <div key={d.date} className="form-cell" style={{background:c.bg,color:c.tx}}>
+                        {r===5?"–":r}
                       </div>
                     );
                   })}
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* ── HEATMAP ── */}
-            <div className="eyebrow">Game strengths · season avg rank · 1 = best · 5 = worst/missed</div>
-            <div className="tbl" style={{overflowX:"auto"}}>
-              {/* Header */}
-              <div style={{display:"grid",gridTemplateColumns:`60px repeat(${LEADERBOARD_GAMES.length},1fr)`,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"8px 10px",gap:4}}>
-                <div className="tbl-hdr-cell"></div>
-                {LEADERBOARD_GAMES.map(g=>(
-                  <div key={g} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-                    <span className="chip" style={{background:GAME_META[g].color,fontSize:9,padding:"2px 5px"}}>{GAME_META[g].abbr}</span>
-                    <span style={{fontSize:8,fontWeight:600,color:"#aaa",letterSpacing:"0.3px",textAlign:"center"}}>{g}</span>
+          <div className="section">
+            <div className="eyebrow">Game strengths · avg rank all time · 1 best → 5 worst</div>
+            <div className="tbl">
+              <div className="heat-row" style={{gridTemplateColumns:`60px repeat(${LB_GAMES.length},1fr)`,gap:4,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"8px 10px"}}>
+                <div/>
+                {LB_GAMES.map(g=>(
+                  <div key={g} style={{textAlign:"center"}}>
+                    <span className="chip" style={{background:GAME_COLOR[g],display:"inline-block",marginBottom:3}}>{GAME_ABBR[g]}</span>
+                    <div style={{fontSize:8,color:"#bbb",fontWeight:600}}>{g}</div>
                   </div>
                 ))}
               </div>
-              {/* Rows */}
               {[...PLAYERS].sort((a,b)=>{
-                const avgA = LEADERBOARD_GAMES.reduce((s,g)=>s+heatmap[a][g],0)/LEADERBOARD_GAMES.length;
-                const avgB = LEADERBOARD_GAMES.reduce((s,g)=>s+heatmap[b][g],0)/LEADERBOARD_GAMES.length;
-                return avgA-avgB;
+                const avg=p=>LB_GAMES.reduce((s,g)=>s+heatmap[p][g],0)/LB_GAMES.length;
+                return avg(a)-avg(b);
               }).map(p=>(
-                <div key={p} style={{display:"grid",gridTemplateColumns:`60px repeat(${LEADERBOARD_GAMES.length},1fr)`,padding:"6px 10px",borderBottom:"1px solid #f2efe8",alignItems:"center",gap:4}}>
+                <div key={p} className="heat-row" style={{gridTemplateColumns:`60px repeat(${LB_GAMES.length},1fr)`,gap:4,padding:"6px 10px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:5}}>
-                    <div style={{width:7,height:7,borderRadius:"50%",background:PLAYER_META[p].color,flexShrink:0}}/>
+                    <div className="dot" style={{background:P_COLOR[p]}}/>
                     <span style={{fontSize:12,fontWeight:700}}>{p}</span>
                   </div>
-                  {LEADERBOARD_GAMES.map(g=>{
-                    const avg = heatmap[p][g];
-                    const c = rankColor(avg);
+                  {LB_GAMES.map(g=>{
+                    const avg=heatmap[p][g];
+                    const c=rankColor(avg);
                     return(
-                      <div key={g} style={{background:c.bg,color:c.text,borderRadius:7,textAlign:"center",padding:"7px 2px"}}>
-                        <div style={{fontSize:14,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>{avg.toFixed(1)}</div>
-                        <div style={{fontSize:8,opacity:0.7,marginTop:1}}>avg</div>
+                      <div key={g} className="heat-cell" style={{background:c.bg,color:c.tx}}>
+                        <div className="heat-val">{avg.toFixed(1)}</div>
+                        <div className="heat-sub">avg</div>
                       </div>
                     );
                   })}
                 </div>
               ))}
             </div>
-
-            {/* Legend */}
-            <div style={{display:"flex",gap:8,marginTop:16,flexWrap:"wrap"}}>
-              {[["#dcfce7","#166534","1.0–1.5 Dominant"],["#d1fae5","#065f46","1.5–2.2 Strong"],["#fef9c3","#854d0e","2.2–2.8 Average"],["#ffedd5","#9a3412","2.8–3.5 Weak"],["#fee2e2","#991b1b","3.5–5.0 Struggling"]].map(([bg,text,label])=>(
-                <div key={label} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:"#777"}}>
-                  <div style={{width:12,height:12,borderRadius:3,background:bg,border:`1px solid ${text}22`}}/>
+            <div className="legend">
+              {[["#dcfce7","#166534","≤1.8 Strong"],["#fef9c3","#854d0e","≤2.5 OK"],["#ffedd5","#9a3412","≤3.2 Weak"],["#fee2e2","#991b1b",">3.2 Struggling"]].map(([bg,tx,label])=>(
+                <div key={label} className="leg-item">
+                  <div className="leg-dot" style={{background:bg,border:`1px solid ${tx}33`}}/>
                   {label}
                 </div>
               ))}
             </div>
-          </>);
-        })()}
-
-
+          </div>
+        </>)}
 
       </div>
     </div>
