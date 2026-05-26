@@ -523,7 +523,7 @@ export default function App() {
 
         {/* ══ TRENDS ════════════════════════════════════════════════════════ */}
         {tab==="trends" && (()=>{
-          const FORM_DAYS = 14;
+          const FORM_DAYS = 12;
           const recentDays = allDays.slice(-FORM_DAYS);
 
           // Heatmap: avg rank per player per game (leaderboard games)
@@ -558,28 +558,28 @@ export default function App() {
           return(<>
             {/* ── FORM TABLE ── */}
             <div className="eyebrow">Recent form · last {FORM_DAYS} days · overall daily rank</div>
-            <div className="tbl" style={{marginBottom:32,overflowX:"auto"}}>
+            <div className="tbl" style={{marginBottom:32}}>
               {/* Header row - dates */}
-              <div style={{display:"grid",gridTemplateColumns:`64px repeat(${FORM_DAYS},1fr)`,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"8px 12px",gap:4,minWidth:480}}>
-                <div className="tbl-hdr-cell">Player</div>
+              <div style={{display:"grid",gridTemplateColumns:`56px repeat(${FORM_DAYS},1fr)`,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"8px 10px",gap:3}}>
+                <div className="tbl-hdr-cell"></div>
                 {recentDays.map(d=>(
-                  <div key={d.date} style={{fontSize:9,fontWeight:600,color:"#bbb",textAlign:"center",letterSpacing:"0.5px"}}>
-                    {dateLabel(d.date).split(" ")[0]}
+                  <div key={d.date} style={{fontSize:8,fontWeight:600,color:"#bbb",textAlign:"center",letterSpacing:"0.3px",lineHeight:1.2}}>
+                    {dateLabel(d.date).replace(" ","\n")}
                   </div>
                 ))}
               </div>
               {/* Player rows */}
               {PLAYERS.map(p=>(
-                <div key={p} style={{display:"grid",gridTemplateColumns:`64px repeat(${FORM_DAYS},1fr)`,padding:"6px 12px",borderBottom:"1px solid #f2efe8",alignItems:"center",gap:4,minWidth:480}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:PLAYER_META[p].color,flexShrink:0}}/>
-                    <span style={{fontSize:12,fontWeight:600}}>{p}</span>
+                <div key={p} style={{display:"grid",gridTemplateColumns:`56px repeat(${FORM_DAYS},1fr)`,padding:"5px 10px",borderBottom:"1px solid #f2efe8",alignItems:"center",gap:3}}>
+                  <div style={{display:"flex",alignItems:"center",gap:5,overflow:"hidden"}}>
+                    <div style={{width:7,height:7,borderRadius:"50%",background:PLAYER_META[p].color,flexShrink:0}}/>
+                    <span style={{fontSize:11,fontWeight:700,color:"#111",whiteSpace:"nowrap"}}>{p}</span>
                   </div>
                   {recentDays.map(d=>{
                     const rank = d.lb.dayRanks[p] || DEFAULT_RANK;
                     const c = formColor(rank);
                     return(
-                      <div key={d.date} style={{background:c.bg,color:c.text,borderRadius:5,textAlign:"center",padding:"5px 2px",fontSize:11,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>
+                      <div key={d.date} style={{background:c.bg,color:c.text,borderRadius:5,textAlign:"center",padding:"5px 1px",fontSize:11,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>
                         {rank===5?"–":rank}
                       </div>
                     );
@@ -592,34 +592,33 @@ export default function App() {
             <div className="eyebrow">Game strengths · season avg rank · 1 = best · 5 = worst/missed</div>
             <div className="tbl" style={{overflowX:"auto"}}>
               {/* Header */}
-              <div style={{display:"grid",gridTemplateColumns:`72px repeat(${LEADERBOARD_GAMES.length},1fr)`,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"10px 12px",gap:6,minWidth:400}}>
-                <div className="tbl-hdr-cell">Player</div>
+              <div style={{display:"grid",gridTemplateColumns:`60px repeat(${LEADERBOARD_GAMES.length},1fr)`,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"8px 10px",gap:4}}>
+                <div className="tbl-hdr-cell"></div>
                 {LEADERBOARD_GAMES.map(g=>(
-                  <div key={g} style={{display:"flex",alignItems:"center",gap:5}}>
-                    <span className="chip" style={{background:GAME_META[g].color,fontSize:9}}>{GAME_META[g].abbr}</span>
-                    <span style={{fontSize:10,fontWeight:600,color:"#aaa",letterSpacing:"0.5px"}}>{g}</span>
+                  <div key={g} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                    <span className="chip" style={{background:GAME_META[g].color,fontSize:9,padding:"2px 5px"}}>{GAME_META[g].abbr}</span>
+                    <span style={{fontSize:8,fontWeight:600,color:"#aaa",letterSpacing:"0.3px",textAlign:"center"}}>{g}</span>
                   </div>
                 ))}
               </div>
               {/* Rows */}
               {[...PLAYERS].sort((a,b)=>{
-                // Sort by overall avg
                 const avgA = LEADERBOARD_GAMES.reduce((s,g)=>s+heatmap[a][g],0)/LEADERBOARD_GAMES.length;
                 const avgB = LEADERBOARD_GAMES.reduce((s,g)=>s+heatmap[b][g],0)/LEADERBOARD_GAMES.length;
                 return avgA-avgB;
               }).map(p=>(
-                <div key={p} style={{display:"grid",gridTemplateColumns:`72px repeat(${LEADERBOARD_GAMES.length},1fr)`,padding:"8px 12px",borderBottom:"1px solid #f2efe8",alignItems:"center",gap:6,minWidth:400}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:PLAYER_META[p].color,flexShrink:0}}/>
-                    <span style={{fontSize:13,fontWeight:600}}>{p}</span>
+                <div key={p} style={{display:"grid",gridTemplateColumns:`60px repeat(${LEADERBOARD_GAMES.length},1fr)`,padding:"6px 10px",borderBottom:"1px solid #f2efe8",alignItems:"center",gap:4}}>
+                  <div style={{display:"flex",alignItems:"center",gap:5}}>
+                    <div style={{width:7,height:7,borderRadius:"50%",background:PLAYER_META[p].color,flexShrink:0}}/>
+                    <span style={{fontSize:12,fontWeight:700}}>{p}</span>
                   </div>
                   {LEADERBOARD_GAMES.map(g=>{
                     const avg = heatmap[p][g];
                     const c = rankColor(avg);
                     return(
-                      <div key={g} style={{background:c.bg,color:c.text,borderRadius:7,textAlign:"center",padding:"8px 4px"}}>
-                        <div style={{fontSize:15,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>{avg.toFixed(1)}</div>
-                        <div style={{fontSize:9,opacity:0.7,marginTop:1}}>avg</div>
+                      <div key={g} style={{background:c.bg,color:c.text,borderRadius:7,textAlign:"center",padding:"7px 2px"}}>
+                        <div style={{fontSize:14,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>{avg.toFixed(1)}</div>
+                        <div style={{fontSize:8,opacity:0.7,marginTop:1}}>avg</div>
                       </div>
                     );
                   })}
