@@ -325,7 +325,7 @@ export default function App() {
             background:punish?"#ef4444":"#22c55e",color:"#fff",
             letterSpacing:"0.3px",transition:"background .2s",
           }}>
-            {punish?"😤 Punishing":"😇 Forgiving"}
+            {punish?"🏆 Regularity rewarded":"🎯 Skill only"}
           </button>
         </div>
         <nav className="tabs">
@@ -593,7 +593,7 @@ export default function App() {
               {[
                 ["Daily ranking","Each day, players are ranked 1–4 within each game. Fastest / fewest guesses = rank 1. Ties share the lower rank (e.g. two players tied for 2nd both get rank 2, next player gets rank 4)."],
                 ["Day winner","The player with the lowest total rank across all games that day wins the day."],
-                ["Missed a game","If you don't post a score for a game, you get rank 5 — worse than last place. Don't ghost the group. Toggle to 😇 Forgiving mode (top right) to only count games where every player participated — if anyone sat it out, that game is skipped for everyone that day."],
+                ["Missed a game","If you don't post a score for a game, you get rank 5 — worse than last place. Toggle to 🎯 Skill only to strip out attendance — only games where all 4 players showed up count, so standings reflect pure performance."],
                 ["No data at all","If nobody played a game on a given day, that game is skipped entirely and adds nothing to anyone's score."],
                 ["Monthly & yearly points","Points accumulate across days. Lower total = better. Think of it like golf."],
               ].map(([title, desc])=>(
