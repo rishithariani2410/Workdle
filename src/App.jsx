@@ -30,25 +30,28 @@ function rankTotals(totals) {
 }
 
 function gameHasData(ranks, game) {
-  // Returns true if at least one player has real data for this game
   return Object.values(ranks[game]||{}).some(v=>v<DEFAULT_RANK);
 }
 
-function computeTotals(ranks, games) {
+function computeTotals(ranks, games, punish=true) {
+  const activeGames=games.filter(g=>{
+    if(!gameHasData(ranks,g)) return false;
+    // In forgiving mode, only count a game if ALL players have real data
+    if(!punish) return PLAYERS.every(p=>(ranks[g]?.[p]??DEFAULT_RANK)<DEFAULT_RANK);
+    return true;
+  });
   const totals={};
-  // Only count games where at least one player has real data
-  const activeGames=games.filter(g=>gameHasData(ranks,g));
   PLAYERS.forEach(p=>{
     totals[p]=activeGames.reduce((s,g)=>s+(ranks[g]?.[p]??DEFAULT_RANK),0);
   });
   return {totals, dayRanks:rankTotals(totals), activeGames};
 }
 
-function standings(days, games) {
+function standings(days, games, punish=true) {
   const pts={},wins={};
   PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;});
   days.forEach(d=>{
-    const {totals,dayRanks}=computeTotals(d.ranks,games);
+    const {totals,dayRanks}=computeTotals(d.ranks,games,punish);
     PLAYERS.forEach(p=>pts[p]+=totals[p]);
     PLAYERS.filter(p=>dayRanks[p]===1).forEach(p=>wins[p]++);
   });
@@ -56,12 +59,17 @@ function standings(days, games) {
   return {pts,wins,sorted,ranks:rankTotals(pts)};
 }
 
-function gamePts(days, game) {
+function gamePts(days, game, punish=true) {
   const pts={};
   PLAYERS.forEach(p=>pts[p]=0);
-  // Only count days where at least one player has real data for this game
-  days.filter(d=>gameHasData(d.ranks,game))
-      .forEach(d=>PLAYERS.forEach(p=>pts[p]+=(d.ranks[game]?.[p]??DEFAULT_RANK)));
+  days.filter(d=>{
+    if(!gameHasData(d.ranks,game)) return false;
+    // In forgiving mode, only count days where all players played
+    if(!punish) return PLAYERS.every(p=>(d.ranks[game]?.[p]??DEFAULT_RANK)<DEFAULT_RANK);
+    return true;
+  }).forEach(d=>{
+    PLAYERS.forEach(p=>pts[p]+=(d.ranks[game]?.[p]??DEFAULT_RANK));
+  });
   return {pts,sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b])};
 }
 
@@ -191,12 +199,13 @@ export default function App() {
   const [month,setMonth]   = useState("2026-05");
   const [selDay,setDay]    = useState(null);
   const [selGame,setGame]  = useState("Wordle");
+  const [punish,setPunish] = useState(true);
 
   const allDays = useMemo(()=>SEED_DATA.map(d=>({
     ...d,
-    lb: computeTotals(d.ranks, LB_GAMES),
-    all:computeTotals(d.ranks, ALL_GAMES),
-  })),[]);
+    lb: computeTotals(d.ranks, LB_GAMES, punish),
+    all:computeTotals(d.ranks, ALL_GAMES, punish),
+  })),[punish]);
 
   const years = useMemo(()=>["all",...[...new Set(SEED_DATA.map(d=>d['date'].slice(0,4)))].sort()],[]);
   // All months Jan 2023-May 2026, including empty ones for labelling
@@ -213,12 +222,12 @@ export default function App() {
 
   // Year tab: filtered days
   const yearDays = useMemo(()=>yearFilt==="all"?allDays:allDays.filter(d=>d.date.startsWith(yearFilt)),[allDays,yearFilt]);
-  const yearStats= useMemo(()=>standings(yearDays,LB_GAMES),[yearDays]);
+  const yearStats= useMemo(()=>standings(yearDays,LB_GAMES,punish),[yearDays,punish]);
   const yearGameStats=useMemo(()=>{
     const out={};
-    LB_GAMES.forEach(g=>{out[g]=gamePts(yearDays,g);});
+    LB_GAMES.forEach(g=>{out[g]=gamePts(yearDays,g,punish);});
     return out;
-  },[yearDays]);
+  },[yearDays,punish]);
 
   // Daily tab
   const monthDays = useMemo(()=>allDays.filter(d=>d.date.startsWith(month)),[allDays,month]);
@@ -226,7 +235,7 @@ export default function App() {
   const daySorted = selDayData?[...PLAYERS].sort((a,b)=>selDayData.all.totals[a]-selDayData.all.totals[b]):[];
 
   // Games tab
-  const gameAllTime = useMemo(()=>gamePts(allDays,selGame),[allDays,selGame]);
+  const gameAllTime = useMemo(()=>gamePts(allDays,selGame,punish),[allDays,selGame,punish]);
 
   // Trends
   const FORM_DAYS=14;
@@ -309,6 +318,15 @@ export default function App() {
         <div className="hdr-top">
           <div className="logo">Work<em>dle</em></div>
           <div className="hdr-sub">JAN 2023 – MAY 2026<br/>{allDays.length} DAYS</div>
+          <button onClick={()=>setPunish(!punish)} style={{
+            marginLeft:"auto",flexShrink:0,
+            padding:"5px 10px",borderRadius:20,border:"none",cursor:"pointer",
+            fontFamily:"'DM Sans',sans-serif",fontSize:11,fontWeight:700,
+            background:punish?"#ef4444":"#22c55e",color:"#fff",
+            letterSpacing:"0.3px",transition:"background .2s",
+          }}>
+            {punish?"😤 Punishing":"😇 Forgiving"}
+          </button>
         </div>
         <nav className="tabs">
           {[["year","🏆 Year"],["scores","📅 Scores"],["games","🎮 Games"],["trends","📊 Trends"],["info","📖 Rules"]].map(([v,l])=>(
@@ -362,7 +380,7 @@ export default function App() {
 
           {/* Month summary */}
           {(()=>{
-            const mStats=standings(monthDays,ALL_GAMES);
+            const mStats=standings(monthDays,ALL_GAMES,punish);
             return(<>
               <div className="section">
                 <div className="eyebrow">{fmtMonth(month)} · standings · {monthDays.length} days</div>
@@ -575,7 +593,7 @@ export default function App() {
               {[
                 ["Daily ranking","Each day, players are ranked 1–4 within each game. Fastest / fewest guesses = rank 1. Ties share the lower rank (e.g. two players tied for 2nd both get rank 2, next player gets rank 4)."],
                 ["Day winner","The player with the lowest total rank across all games that day wins the day."],
-                ["Missed a game","If you don't post a score for a game, you get rank 5 — worse than last place. Don't ghost the group."],
+                ["Missed a game","If you don't post a score for a game, you get rank 5 — worse than last place. Don't ghost the group. Toggle to 😇 Forgiving mode (top right) to only count games where every player participated — if anyone sat it out, that game is skipped for everyone that day."],
                 ["No data at all","If nobody played a game on a given day, that game is skipped entirely and adds nothing to anyone's score."],
                 ["Monthly & yearly points","Points accumulate across days. Lower total = better. Think of it like golf."],
               ].map(([title, desc])=>(
