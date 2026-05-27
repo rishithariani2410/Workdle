@@ -311,7 +311,7 @@ export default function App() {
           <div className="hdr-sub">JAN 2023 – MAY 2026<br/>{allDays.length} DAYS</div>
         </div>
         <nav className="tabs">
-          {[["year","🏆 Year"],["scores","📅 Scores"],["games","🎮 Games"],["trends","📊 Trends"]].map(([v,l])=>(
+          {[["year","🏆 Year"],["scores","📅 Scores"],["games","🎮 Games"],["trends","📊 Trends"],["info","📖 Rules"]].map(([v,l])=>(
             <button key={v} className={`tab ${tab===v?"on":""}`} onClick={()=>setTab(v)}>{l}</button>
           ))}
         </nav>
@@ -564,6 +564,68 @@ export default function App() {
               ))}
             </div>
           </div>
+        </>)}
+
+        {/* ══ RULES ═════════════════════════════════════════════════════════ */}
+        {tab==="info" && (<>
+
+          <div className="section">
+            <div className="eyebrow">How scoring works</div>
+            <div className="tbl">
+              {[
+                ["Daily ranking","Each day, players are ranked 1–4 within each game. Fastest / fewest guesses = rank 1. Ties share the lower rank (e.g. two players tied for 2nd both get rank 2, next player gets rank 4)."],
+                ["Day winner","The player with the lowest total rank across all games that day wins the day."],
+                ["Missed a game","If you don't post a score for a game, you get rank 5 — worse than last place. Don't ghost the group."],
+                ["No data at all","If nobody played a game on a given day, that game is skipped entirely and adds nothing to anyone's score."],
+                ["Monthly & yearly points","Points accumulate across days. Lower total = better. Think of it like golf."],
+              ].map(([title, desc])=>(
+                <div key={title} style={{padding:"14px 16px",borderBottom:"1px solid #f2efe8"}}>
+                  <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>{title}</div>
+                  <div style={{fontSize:12,color:"#666",lineHeight:1.6}}>{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="section">
+            <div className="eyebrow">The games</div>
+            <div className="tbl">
+              {[
+                ["Wordle","W","#4ade80","Guess the 5-letter word. Score = number of guesses (1–6). Fail = 7. Lower is better."],
+                ["Connections","C","#60a5fa","Group 16 words into 4 categories. Score = total rows used (4 = perfect, each wrong guess adds a row). Fail to complete = 8."],
+                ["Tango","T","#a78bfa","LinkedIn logic puzzle. Score = time in seconds. Faster is better."],
+                ["Queens","Q","#34d399","Place queens on a grid. Score = time in seconds. Faster is better."],
+                ["Pinpoint","Pt","#fbbf24","Guess the category from examples. Score = number of guesses (1–5). Fail = 6."],
+                ["Patches","Pa","#f472b6","Sewing-themed puzzle. Score = time in seconds. Faster is better."],
+                ["Zip","Z","#fb923c","Connect the dots puzzle. Score = time in seconds. Faster is better."],
+              ].map(([name,abbr,color,desc])=>(
+                <div key={name} style={{padding:"12px 16px",borderBottom:"1px solid #f2efe8",display:"flex",gap:12,alignItems:"flex-start"}}>
+                  <span className="chip" style={{background:color,marginTop:2,flexShrink:0}}>{abbr}</span>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,marginBottom:3}}>{name}</div>
+                    <div style={{fontSize:12,color:"#666",lineHeight:1.5}}>{desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="section">
+            <div className="eyebrow">Data sources</div>
+            <div className="tbl">
+              {[
+                ["WhatsApp chat","Primary source. Scores parsed directly from daily messages in the group chat."],
+                ["Google Sheet","Fallback for days not in the chat (Feb 2025 – Jan 2026). Sheet rankings used directly."],
+                ["Coverage","Jan–Jun 2023 (Wordle only) · Feb 2025–Jan 2026 (5 games via sheet) · Mar–May 2026 (all 7 games via chat). Jul 2023–Jan 2025 and Sep–Dec 2025 have no data."],
+              ].map(([title,desc])=>(
+                <div key={title} style={{padding:"14px 16px",borderBottom:"1px solid #f2efe8"}}>
+                  <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>{title}</div>
+                  <div style={{fontSize:12,color:"#666",lineHeight:1.6}}>{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </>)}
 
       </div>
