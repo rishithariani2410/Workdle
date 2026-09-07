@@ -26,6 +26,8 @@ uploads in chat**. Follow the methodology below exactly.
 **Message format**: `[DD/MM/YYYY, HH:MM:SS] Sender Name: message text`
 Split the file into multiline messages via this header regex, then process each message individually.
 
+**Assigning a message to the correct day**: do NOT just use the message's own send-date. Players occasionally post a result just after midnight (e.g. `00:11`) for the *previous* day's puzzle — using the raw send-date would misattribute it to the wrong day (and silently make it look like they missed that day). Every game (Wordle, Connections, Tango, Queens, Pinpoint, Patches, Zip) publishes exactly one puzzle per calendar day with a ticking `#N` puzzle number, so puzzle number and calendar day are perfectly correlated. For each game: compute `offset = mode(send_date.toordinal() - puzzle_number)` across all of that game's messages in the file, then take each message's canonical day as `date.fromordinal(offset + puzzle_number)` rather than its literal send-date. The mode self-corrects for the rare after-midnight straggler as long as most players post same-day.
+
 **Player name mapping**
 
 | WhatsApp Name | App Name |
