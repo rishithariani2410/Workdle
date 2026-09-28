@@ -4,17 +4,33 @@ A single-page React app (`react-scripts`) that tracks a friend group's daily
 scores across NYT/LinkedIn puzzle games (Wordle, Connections, Tango, Queens,
 Pinpoint, Patches, Zip) and shows leaderboards/trends.
 
-- `src/App.jsx` — the entire app: UI, scoring logic, and the hardcoded
-  `SEED_DATA` array (all historical daily results, one object per day).
+- `src/App.jsx` — the entire app: UI and scoring logic. Imports the data as `SEED_DATA`.
+- `src/data.json` — all historical daily results, one day per line.
+- `scripts/update_scores.py` — parses a WhatsApp export into `src/data.json` (implements the methodology below).
 - `src/index.js` — mounts `<App />`.
 - `public/index.html` — HTML shell.
 - Deployed on Vercel; pushing to `main` auto-redeploys in ~60s.
 
 ## When the user shares a WhatsApp `.txt` chat export
 
-This repo has no in-app uploader — updating scores means **regenerating
-`SEED_DATA` in `src/App.jsx` from a WhatsApp export file the user pastes/
-uploads in chat**. Follow the methodology below exactly.
+This repo has no in-app uploader — updating scores means **updating
+`src/data.json` from a WhatsApp export file the user pastes/uploads in chat**.
+Run the script; don't re-implement the parser:
+
+```
+python3 scripts/update_scores.py path/to/_chat.txt --dry-run   # review first
+python3 scripts/update_scores.py path/to/_chat.txt             # then write
+```
+
+Read the dry-run report before writing. It lists added days and, for any
+existing day it would rewrite, the per-game before → after ranks. Stop and
+check with the user if it shows a `⚠ lost score` or `WARNING: no messages`.
+WhatsApp exports can silently miss whole stretches of messages, and one such
+export was missing 28 May–9 Jun 2026. The script never deletes existing days,
+but a partially exported day would still overwrite a complete one.
+
+The methodology below documents what the script does. If you change the
+rules, change the script and this file together.
 
 ### Data Sources
 
@@ -93,10 +109,10 @@ Only ranks (1–5) are stored — no raw scores.
 ### Update process
 
 1. Take the WhatsApp export `.txt` from the Workdle group (as shared by the user in chat).
-2. Parse only from **(last date in app − 1 day)** onwards — overlap by 1 day to catch any late-posted scores.
-3. Remove that overlap day from the existing `SEED_DATA`, append the freshly parsed version.
-4. **Exclude today** — always drop the most recent date, since scores trickle in through the day.
-5. Replace `const SEED_DATA=[...]` in `src/App.jsx` with the new merged array.
+2. Parse only from **(last date in app − 1 day)** onwards — overlap by 1 day to catch any late-posted scores. (Script default; override with `--from`.)
+3. Replace the days in that window with the freshly parsed versions. Days the export has no messages for are kept as they were.
+4. **Exclude today**: always stop at the day before the last date in the chat, since scores trickle in through the day. (Script default; override with `--through`.)
+5. The script writes `src/data.json`. Check that `npm run build` still passes if you touched `src/App.jsx`.
 6. Commit and push → Vercel auto-redeploys in ~60 seconds.
 
 ### Key edge cases
@@ -131,6 +147,8 @@ Only ranks (1–5) are stored — no raw scores.
 
 | File | Purpose |
 |---|---|
-| `src/App.jsx` | Full React app including embedded `SEED_DATA` |
+| `src/App.jsx` | Full React app (UI + scoring logic) |
+| `src/data.json` | Daily ranks, one day per line |
+| `scripts/update_scores.py` | WhatsApp export → `src/data.json` |
 | `public/index.html` | HTML shell required by Vercel |
 | `package.json` | Dependencies (React 18, recharts) |
