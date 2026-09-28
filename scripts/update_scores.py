@@ -34,6 +34,7 @@ WORDLE_RE = re.compile(r'Wordle\s+([\d,]+)\s+([1-6X])/6')
 TIME_GAME_RE = re.compile(r'\b(Tango|Queens|Zip|Patches)\s*#\s*(\d+)[^\n]*\|\s*(\d+):(\d{2})')
 PINPOINT_HDR_RE = re.compile(r'Pinpoint\s*#\s*(\d+)')
 PINPOINT_GUESSES_RE = re.compile(r'Pinpoint\s*#\s*\d+[^\n]*\|\s*(\d+)\s*guess')
+PINPOINT_PIN_RE = re.compile(r'Pinpoint\s*#\s*\d+[^\n]*\|\s*(\d)\s*📌')  # "Pinpoint #815 | 5 📌"
 PINPOINT_FRACTION_RE = re.compile(r'\((\d)/5\)')
 CONNECTIONS_HDR_RE = re.compile(r'Connections\s*\nPuzzle\s*#\s*(\d+)')
 GRID_ROW_RE = re.compile(r'^(🟨|🟩|🟦|🟪){4}$')
@@ -85,13 +86,17 @@ def parse_pinpoint(body):
     if not m:
         return None
     num = int(m.group(1))
-    g = PINPOINT_GUESSES_RE.search(body) or PINPOINT_FRACTION_RE.search(body)
+    g = (PINPOINT_GUESSES_RE.search(body) or PINPOINT_PIN_RE.search(body)
+         or PINPOINT_FRACTION_RE.search(body))
     if g:
         return num, int(g.group(1))
     if "📌" in body:
         # Solved but in a format we don't recognise: count 🤔 before 📌.
         before = body.split("📌", 1)[0]
-        return num, before.count("🤔") + 1
+        guesses = before.count("🤔") + 1
+        print(f"WARNING: unrecognised Pinpoint #{num} format, guessed {guesses} guess(es) "
+              f"from 🤔 count: {body.splitlines()[0]!r}", file=sys.stderr)
+        return num, guesses
     return num, 6
 
 
@@ -194,7 +199,8 @@ def main():
     merged = {d["date"]: d for d in existing}
     old_by_date = dict(merged)
     for d in new_days:
-        merged[d["date"]] = d
+        if merged.get(d["date"]) != d:  # keep unchanged days byte-for-byte (key order) for clean diffs
+            merged[d["date"]] = d
     merged = [merged[k] for k in sorted(merged)]
 
     changed = [d for d in new_days if d["date"] in old_by_date and old_by_date[d["date"]] != d]

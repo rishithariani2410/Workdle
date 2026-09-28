@@ -60,7 +60,7 @@ Ignore all other senders (other group members not tracked in the leaderboard).
 - **Wordle** — regex `Wordle [\d,]+ (\d|X)/6\*?`. Score = guesses (1–6), `X` = 7 (fail). Trailing `*` (hard mode) treated identically.
 - **Connections** — count all lines matching `^[🟨🟩🟦🟪]{4}$` (attempt rows). Count solid-colour rows (all 4 emoji identical) = successful group solves. If solid rows < 4 → failed to complete → score = **8**. Otherwise score = 4 + (total rows − solid rows), i.e. 4 = perfect, 7 = 3 mistakes. Lower is better.
 - **Tango / Queens / Patches / Zip** — regex `GameName #\d+ \| (\d+):(\d+)`. Convert MM:SS to total seconds. Lower is better.
-- **Pinpoint** — try `| N guess` pattern first, then `(N/5)`, then count 🤔 emojis before 📌 (solved on Nth guess). If `Pinpoint #` present but no 📌 anywhere → fail = **6**. Score range 1–5, fail = 6. Lower is better.
+- **Pinpoint** — try `| N guess` pattern first, then `| N 📌` (e.g. `Pinpoint #815 | 5 📌`), then `(N/5)`, then count 🤔 emojis before 📌 (solved on Nth guess; the script warns when it falls back to this). If `Pinpoint #` present but no 📌 anywhere → fail = **6**. Score range 1–5, fail = 6. Lower is better.
 
 ### Ranking Logic
 
