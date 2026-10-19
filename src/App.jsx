@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import SEED_DATA from "./data.json";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
@@ -47,10 +47,12 @@ function computeTotals(ranks,games,punish=true){
 
 function standings(days,games,punish=true){
   const pts={},wins={},played={};
+  let slots=0; // game-days counted; the same for every player, so pts/slots is a fair average
   PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;played[p]=0;});
   days.forEach(d=>{
     const{totals,dayRanks,activeGames}=computeTotals(d.ranks,games,punish);
     if(activeGames.length===0)return;
+    slots+=activeGames.length;
     PLAYERS.forEach(p=>{
       pts[p]+=totals[p];
       // count days player actually participated in at least one active game
@@ -59,7 +61,7 @@ function standings(days,games,punish=true){
     PLAYERS.filter(p=>dayRanks[p]===1).forEach(p=>wins[p]++);
   });
   const sorted=[...PLAYERS].sort((a,b)=>pts[a]-pts[b]);
-  return{pts,wins,played,sorted,ranks:rankTotals(pts)};
+  return{pts,wins,played,slots,sorted,ranks:rankTotals(pts)};
 }
 
 function gamePts(days,game,punish=true){
@@ -76,7 +78,7 @@ function gamePts(days,game,punish=true){
       if((d.ranks[game]?.[p]??DEFAULT_RANK)<DEFAULT_RANK)played[p]++;
     });
   });
-  return{pts,played,days:counted.length,sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b]),ranks:rankTotals(pts)};
+  return{pts,played,days:counted.length,slots:counted.length,sorted:[...PLAYERS].sort((a,b)=>pts[a]-pts[b]),ranks:rankTotals(pts)};
 }
 
 function calcStreak(days,punish){
@@ -106,6 +108,10 @@ function fmtMonth(ym){
   const[y,m]=ym.split("-");
   return new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"short",year:"numeric"});
 }
+function fmtDayLong(iso){
+  return new Date(iso+"T12:00:00Z").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+function fmtAvg(pts,slots){return slots?(pts/slots).toFixed(2):"–";}
 function fmtDateY(iso){
   return new Date(iso+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"2-digit"});
 }
@@ -145,10 +151,12 @@ html,body{background:#f0efe9;min-height:100vh}
 .logo{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.3px;flex-shrink:0}
 .logo em{font-style:italic;color:#a3e635}
 .hdr-sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.5px;line-height:1.4}
-.tog-btn{margin-left:auto;flex-shrink:0;padding:5px 10px;border-radius:20px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.3px;transition:background .2s}
+.seg{margin-left:auto;flex-shrink:0;display:flex;background:rgba(255,255,255,.08);border-radius:20px;padding:2px}
+.seg button{border:none;background:transparent;color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;padding:5px 9px;border-radius:18px;cursor:pointer;transition:all .15s}
+.seg button.on{background:#a3e635;color:#111}
 .tabs{display:flex;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;gap:2px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;transition:all .15s}
+.tab{flex-shrink:0;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;transition:all .15s}
 .tab.on{background:rgba(255,255,255,0.12);color:#fff}
 .body{max-width:600px;margin:0 auto;padding:24px 14px 80px}
 .section{margin-bottom:28px}
@@ -157,7 +165,6 @@ html,body{background:#f0efe9;min-height:100vh}
 .filters::-webkit-scrollbar{display:none}
 .filt{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #e5e3dc;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#777;transition:all .15s;font-family:'DM Sans',sans-serif}
 .filt.on{background:#111;color:#f0efe9;border-color:#111}
-.filt.empty{opacity:0.35;cursor:not-allowed;font-style:italic}
 .s-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .s-card{background:#fff;border-radius:14px;padding:16px;border:1.5px solid #e5e3dc}
 .s-card.gold{background:#111;border-color:#111;color:#f0efe9}
@@ -237,17 +244,53 @@ html,body{background:#f0efe9;min-height:100vh}
 .bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
 .streak-badge{display:inline-flex;align-items:center;gap:3px;background:#fff3cd;color:#856404;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
 .bar-row.gold .streak-badge{background:rgba(163,230,53,.2);color:#a3e635}
+.mode-note{font-size:11.5px;color:#888;line-height:1.5;margin:-4px 0 14px}
+.latest{background:#fff;border-radius:14px;border:1.5px solid #e5e3dc;padding:14px;margin-bottom:28px}
+.latest-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.latest-title{font-size:15px;font-weight:700}
+.latest-sub{font-size:11px;color:#999;margin-top:2px}
+.link-btn{border:none;background:none;color:#111;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px;flex-shrink:0;padding:4px}
+.podium{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pod{border-radius:10px;padding:8px 4px;text-align:center;background:#f7f5f0}
+.pod.gold{background:#111;color:#f0efe9}
+.pod .av{margin:0 auto 4px}
+.pod-name{font-size:12px;font-weight:700}
+.pod-pts{font-family:'DM Mono',monospace;font-size:11px;color:#999;margin-top:1px}
+.pod.gold .pod-pts{color:#a3e635}
+.day-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.day-nav .eyebrow{margin:0;flex:1;text-align:center;color:#111;font-size:11px}
+.nav-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid #e5e3dc;background:#fff;font-size:15px;cursor:pointer;color:#111;flex-shrink:0}
+.nav-btn:disabled{opacity:.3;cursor:default}
 .no-data{text-align:center;padding:32px 16px;color:#aaa;font-size:13px}
 `;
 
+const TABS=[["overview","Overview"],["daily","Daily"],["games","Games"],["trends","Trends"],["info","Rules"]];
+const tabFromHash=()=>{
+  const h=window.location.hash.slice(1);
+  return TABS.some(([v])=>v===h)?h:"overview";
+};
+
 export default function App() {
-  const [tab,setTab]       = useState("year");
+  const [tab,setTabState]  = useState(tabFromHash);
   const [yearFilt,setYear] = useState("all");
-  const [month,setMonth]   = useState(()=>lastDate().slice(0,7));
-  const [selDay,setDay]    = useState(null);
+  const [selDate,setSelDate] = useState(lastDate);
+  const month = selDate.slice(0,7);
   const [selGame,setGame]  = useState("Wordle");
   const [gameYear,setGameYear] = useState("all");
   const [punish,setPunish] = useState(true);
+
+  // Keep the open tab in the URL so refresh, back/forward and shared links work.
+  useEffect(()=>{
+    const onHash=()=>setTabState(tabFromHash());
+    window.addEventListener("hashchange",onHash);
+    return()=>window.removeEventListener("hashchange",onHash);
+  },[]);
+  const setTab=v=>{
+    if(v!==tab)window.history.pushState(null,"",v==="overview"?window.location.pathname:`#${v}`);
+    setTabState(v);
+    window.scrollTo(0,0);
+  };
+  const openDay=date=>{setSelDate(date);setTab("daily");};
 
   const allDays = useMemo(()=>SEED_DATA.map(d=>({
     ...d,
@@ -257,7 +300,7 @@ export default function App() {
 
   const years = useMemo(()=>["all",...[...new Set(SEED_DATA.map(d=>d.date.slice(0,4)))].sort().reverse()],[]);
 
-  const allMonths = useMemo(()=>[...ALL_MONTHS].reverse(),[]);
+  const dataMonths = useMemo(()=>ALL_MONTHS.filter(m=>DATA_MONTHS.has(m)).reverse(),[]);
 
   // Year tab
   const yearDays=useMemo(()=>yearFilt==="all"?allDays:allDays.filter(d=>d.date.startsWith(yearFilt)),[allDays,yearFilt]);
@@ -272,8 +315,10 @@ export default function App() {
   // Scores tab
   const monthDays=useMemo(()=>allDays.filter(d=>d.date.startsWith(month)),[allDays,month]);
   const monthStats=useMemo(()=>standings(monthDays,ALL_GAMES,punish),[monthDays,punish]);
-  const selDayData=selDay!=null?monthDays[selDay]:null;
-  const daySorted=selDayData?[...PLAYERS].sort((a,b)=>selDayData.all.totals[a]-selDayData.all.totals[b]):[];
+  const selIdx=allDays.findIndex(d=>d.date===selDate);
+  const selDayData=allDays[selIdx];
+  const latestDay=allDays[allDays.length-1];
+  const pickMonth=m=>{const ds=allDays.filter(d=>d.date.startsWith(m));setSelDate(ds[ds.length-1].date);};
 
   // Games tab
   const gameDays=useMemo(()=>gameYear==="all"?allDays:allDays.filter(d=>d.date.startsWith(gameYear)),[allDays,gameYear]);
@@ -320,9 +365,9 @@ export default function App() {
   const Av=({p,sz=32})=>(
     <div className="av" style={{width:sz,height:sz,background:P_COLOR[p],fontSize:sz<28?9:10}}>{P_INIT[p]}</div>
   );
-  const RB=({r})=><span className={`rb rb${r}`}>{r===5?"–":r}</span>;
+  const RB=({r})=><span className={`rb rb${r}`} title={r===5?"Didn't play":`Rank ${r}`}>{r===5?"–":r}</span>;
 
-  const Cards=({st,label,showStreak=false})=>{
+  const Cards=({st,showStreak=false})=>{
     // Bar length: invert so lowest pts = longest bar
     const vals=Object.values(st.pts);
     const minPts=Math.min(...vals);
@@ -342,14 +387,13 @@ export default function App() {
                 <div style={{flex:1}}>
                   <div className="bar-name">{p}</div>
                   <div className="bar-meta">
-                    {st.wins[p]} day win{st.wins[p]!==1?"s":""}
-                    {st.played&&<> · {st.played[p]} days played</>}
-                    {showStreak&&streaks[p]>1&&<> · <span className="streak-badge">🔥 {streaks[p]}</span></>}
+                    {st.wins[p]} win{st.wins[p]!==1?"s":""} · {st.played[p]} days played · {st.pts[p].toLocaleString("en-GB")} pts
                   </div>
+                  {showStreak&&streaks[p]>1&&<div style={{marginTop:4}}><span className="streak-badge">🔥 won the last {streaks[p]} days</span></div>}
                 </div>
                 <div style={{textAlign:"right"}}>
-                  <div className="bar-pts">{st.pts[p]}</div>
-                  <div className="bar-meta">{label}</div>
+                  <div className="bar-pts">{fmtAvg(st.pts[p],st.slots)}</div>
+                  <div className="bar-meta">avg rank</div>
                 </div>
               </div>
               <div className="bar-track">
@@ -385,7 +429,7 @@ export default function App() {
                   <span className="g-num">{gStats[g].ranks[p]}</span>
                   <div className="dot" style={{background:P_COLOR[p]}}/>
                   <span className="g-player">{p}</span>
-                  <span className="g-pts">{gStats[g].pts[p]}</span>
+                  <span className="g-pts" title={`${gStats[g].pts[p]} pts`}>{fmtAvg(gStats[g].pts[p],gStats[g].slots)}</span>
                 </div>
                 <div style={{height:4,background:"#f0ede8",borderRadius:2,overflow:"hidden",marginLeft:18}}>
                   <div style={{height:"100%",width:`${barPct(p)}%`,background:P_COLOR[p],opacity:gStats[g].ranks[p]===1?1:0.55,borderRadius:2,transition:"width .4s"}}/>
@@ -398,20 +442,68 @@ export default function App() {
     </div>
   );
 
+  const Podium=({d})=>(
+    <div className="podium">
+      {[...PLAYERS].sort((a,b)=>d.all.totals[a]-d.all.totals[b]).map(p=>{
+        const r=d.all.dayRanks[p];
+        return(
+          <div key={p} className={`pod ${r===1?"gold":""}`}>
+            <Av p={p} sz={26}/>
+            <div className="pod-name">{r===1?"🏆 ":""}{p}</div>
+            <div className="pod-pts">{d.all.totals[p]} pts</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const Breakdown=({d})=>(
+    <div className="tbl">
+      <div className="tbl-hdr" style={{gridTemplateColumns:"110px repeat(4,1fr)"}}>
+        <div className="tbl-label">Game</div>
+        {PLAYERS.map(p=>(
+          <div key={p} className="tbl-p-hdr">
+            <div className="dot" style={{background:P_COLOR[p]}}/>
+            {p}
+          </div>
+        ))}
+      </div>
+      {ALL_GAMES.filter(g=>gameHasData(d.ranks,g)).map(game=>{
+        const counted=d.all.activeGames.includes(game);
+        return(
+          <div key={game} className="tbl-row" style={{gridTemplateColumns:"110px repeat(4,1fr)",opacity:counted?1:0.4}}
+            title={counted?undefined:"Not counted in Skill only mode — someone didn't play"}>
+            <div className="game-cell">
+              <span className="chip" style={{background:GAME_COLOR[game]}}>{GAME_ABBR[game]}</span>
+              {game}
+            </div>
+            {PLAYERS.map(p=>(
+              <div key={p}><RB r={d.ranks[game]?.[p]??DEFAULT_RANK}/></div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const modeNote=punish
+    ?"🏆 Regularity: a missed game counts as 5th place. Lowest average rank wins."
+    :"🎯 Skill only: a game only counts on days all four played it. Lowest average rank wins.";
+
   return(<>
     <style>{CSS}</style>
     <div className="app">
       <header className="hdr">
         <div className="hdr-top">
           <div className="logo">Work<em>dle</em></div>
-          <div className="hdr-sub">{fmtDateY(firstDate())} – {fmtDateY(lastDate())}<br/>{allDays.length} DAYS</div>
-          <button className="tog-btn" onClick={()=>setPunish(!punish)}
-            style={{background:punish?"#ef4444":"#22c55e",color:"#fff"}}>
-            {punish?"🏆 Regularity rewarded":"🎯 Skill only"}
-          </button>
+          <div className="hdr-sub">UPDATED {fmtDate(lastDate()).toUpperCase()}<br/>{allDays.length} DAYS</div>
+          <div className="seg" role="group" aria-label="Scoring mode">
+            <button className={punish?"on":""} onClick={()=>setPunish(true)} title="Missed games count as 5th place">🏆 Regularity</button>
+            <button className={!punish?"on":""} onClick={()=>setPunish(false)} title="Only games all four played count">🎯 Skill</button>
+          </div>
         </div>
         <nav className="tabs">
-          {[["year","🏆 Year"],["scores","📅 Scores"],["games","🎮 Games"],["trends","📊 Trends"],["info","📖 Rules"]].map(([v,l])=>(
+          {TABS.map(([v,l])=>(
             <button key={v} className={`tab ${tab===v?"on":""}`} onClick={()=>setTab(v)}>{l}</button>
           ))}
         </nav>
@@ -419,8 +511,18 @@ export default function App() {
 
       <div className="body">
 
-        {/* ══ YEAR ══ */}
-        {tab==="year"&&(<>
+        {/* ══ OVERVIEW ══ */}
+        {tab==="overview"&&(<>
+          <div className="latest">
+            <div className="latest-top">
+              <div>
+                <div className="eyebrow" style={{marginBottom:4}}>Latest day</div>
+                <div className="latest-title">{fmtDayLong(latestDay.date)}</div>
+              </div>
+              <button className="link-btn" onClick={()=>openDay(latestDay.date)}>Game by game →</button>
+            </div>
+            <Podium d={latestDay}/>
+          </div>
           <div className="filters">
             {years.map(y=>(
               <button key={y} className={`filt ${yearFilt===y?"on":""}`} onClick={()=>setYear(y)}>
@@ -429,93 +531,48 @@ export default function App() {
             ))}
           </div>
           <div className="section">
-            <div className="eyebrow">{yearFilt==="all"?"All time":yearFilt} · {yearDays.length} days</div>
-            <Cards st={yearStats} label={yearFilt==="all"?"pts all time":`pts in ${yearFilt}`} showStreak={yearFilt==="all"||yearFilt===LATEST_YEAR}/>
+            <div className="eyebrow">Leaderboard · {yearFilt==="all"?"all time":yearFilt} · {yearDays.length} days</div>
+            <div className="mode-note">{modeNote}</div>
+            <Cards st={yearStats} showStreak={yearFilt==="all"||yearFilt===LATEST_YEAR}/>
           </div>
           <div className="section">
-            <div className="eyebrow">By game</div>
+            <div className="eyebrow">By game · avg rank</div>
             <GameMinis gStats={yearGameStats}/>
           </div>
         </>)}
 
-        {/* ══ SCORES ══ */}
-        {tab==="scores"&&(<>
+        {/* ══ DAILY ══ */}
+        {tab==="daily"&&(<>
           <div className="filters">
-            {allMonths.map(m=>{
-              const isEmpty=EMPTY_MONTHS.includes(m);
-              return(
-                <button key={m} disabled={isEmpty}
-                  className={`filt ${month===m?"on":""} ${isEmpty?"empty":""}`}
-                  onClick={()=>{if(!isEmpty){setMonth(m);setDay(null);}}}>
-                  {fmtMonth(m)}{isEmpty?" · no data":""}
-                </button>
-              );
-            })}
+            {dataMonths.map(m=>(
+              <button key={m} className={`filt ${month===m?"on":""}`} onClick={()=>pickMonth(m)}>
+                {fmtMonth(m)}
+              </button>
+            ))}
           </div>
           <div className="section">
-            <div className="eyebrow">{fmtMonth(month)} · {monthDays.length} days</div>
-            <Cards st={monthStats} label="pts this month"/>
+            <div className="day-nav">
+              <button className="nav-btn" aria-label="Previous day" disabled={selIdx<=0}
+                onClick={()=>setSelDate(allDays[selIdx-1].date)}>‹</button>
+              <div className="eyebrow">{fmtDayLong(selDayData.date)}</div>
+              <button className="nav-btn" aria-label="Next day" disabled={selIdx>=allDays.length-1}
+                onClick={()=>setSelDate(allDays[selIdx+1].date)}>›</button>
+            </div>
+            <div style={{marginBottom:12}}><Podium d={selDayData}/></div>
+            <Breakdown d={selDayData}/>
           </div>
-          <div className="eyebrow">Drill into a day</div>
+          <div className="eyebrow">All days in {fmtMonth(month)}</div>
           <div className="filters">
-            {[...monthDays].reverse().map((d,i)=>{
-              const realIdx=monthDays.length-1-i;
-              return(
-                <button key={d.date}
-                  className={`filt ${selDay===realIdx?"on":""}`}
-                  onClick={()=>setDay(selDay===realIdx?null:realIdx)}>
-                  {fmtDate(d.date)}
-                </button>
-              );
-            })}
+            {[...monthDays].reverse().map(d=>(
+              <button key={d.date} className={`filt ${selDate===d.date?"on":""}`} onClick={()=>setSelDate(d.date)}>
+                {fmtDate(d.date)}
+              </button>
+            ))}
           </div>
-          {selDay!=null&&selDayData&&(<>
-            <div className="section">
-              <div className="eyebrow">{fmtDate(selDayData.date)} · day result</div>
-              <div className="day-sum">
-                {daySorted.map(p=>{
-                  const r=selDayData.all.dayRanks[p];
-                  return(
-                    <div key={p} className={`dc ${r===1?"gold":""}`}>
-                      <div className="dc-rank">{r}</div>
-                      <Av p={p} sz={28}/>
-                      <div className="dc-name">{p}</div>
-                      <div className="dc-pts">{selDayData.all.totals[p]}</div>
-                      <div className="dc-sub">pts</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="section">
-              <div className="eyebrow">Game breakdown</div>
-              <div className="tbl">
-                <div className="tbl-hdr" style={{gridTemplateColumns:"110px repeat(4,1fr)"}}>
-                  <div className="tbl-label">Game</div>
-                  {PLAYERS.map(p=>(
-                    <div key={p} className="tbl-p-hdr">
-                      <div className="dot" style={{background:P_COLOR[p]}}/>
-                      {p}
-                    </div>
-                  ))}
-                </div>
-                {ALL_GAMES.map(game=>{
-                  const hasAny=gameHasData(selDayData.ranks,game);
-                  return(
-                    <div key={game} className="tbl-row" style={{gridTemplateColumns:"110px repeat(4,1fr)",opacity:hasAny?1:0.4}}>
-                      <div className="game-cell">
-                        <span className="chip" style={{background:GAME_COLOR[game]}}>{GAME_ABBR[game]}</span>
-                        {game}
-                      </div>
-                      {PLAYERS.map(p=>(
-                        <div key={p}><RB r={selDayData.ranks[game]?.[p]??DEFAULT_RANK}/></div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </>)}
+          <div className="section">
+            <div className="eyebrow">{fmtMonth(month)} standings · {monthDays.length} days</div>
+            <Cards st={monthStats}/>
+          </div>
         </>)}
 
         {/* ══ GAMES ══ */}
@@ -549,11 +606,11 @@ export default function App() {
                         <Av p={p} sz={28}/>
                         <div style={{flex:1}}>
                           <div className="bar-name">{p}</div>
-                          <div className="bar-meta">{gameStats.played[p]} days played</div>
+                          <div className="bar-meta">{gameStats.played[p]} days played · {gameStats.pts[p]} pts</div>
                         </div>
                         <div style={{textAlign:"right"}}>
-                          <div className="bar-pts">{gameStats.pts[p]}</div>
-                          <div className="bar-meta">pts</div>
+                          <div className="bar-pts">{fmtAvg(gameStats.pts[p],gameStats.slots)}</div>
+                          <div className="bar-meta">avg rank</div>
                         </div>
                       </div>
                       <div className="bar-track">
@@ -571,7 +628,7 @@ export default function App() {
             {gameDayRows.length===0
               ?<div className="no-data">No data for this game / period</div>
               :<div className="det-tbl">
-                <div className="det-row hdr">
+                <div className="det-row hdr" style={{position:"sticky",top:0}}>
                   <div className="tbl-label">Date</div>
                   {PLAYERS.map(p=>(
                     <div key={p} className="tbl-p-hdr">
@@ -599,6 +656,7 @@ export default function App() {
         {tab==="trends"&&(<>
           <div className="section">
             <div className="eyebrow">Recent form · last 14 days · daily rank</div>
+            <div className="mode-note">Tap any day to see it game by game.</div>
             <div className="tbl">
               <div className="form-row" style={{gridTemplateColumns:"52px repeat(14,1fr)",gap:2,background:"#f7f5f0",borderBottom:"1.5px solid #e5e3dc",padding:"7px 10px"}}>
                 <div/>
@@ -618,9 +676,11 @@ export default function App() {
                     const r=d.lb.dayRanks[p]??DEFAULT_RANK;
                     const c=formColor(r);
                     return(
-                      <div key={d.date} className="form-cell" style={{background:c.bg,color:c.tx}}>
+                      <button key={d.date} className="form-cell" onClick={()=>openDay(d.date)}
+                        title={`${p} · ${fmtDayLong(d.date)} · rank ${r}`}
+                        style={{background:c.bg,color:c.tx,border:"none",cursor:"pointer",width:"100%"}}>
                         {r===5?"–":r}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -683,6 +743,7 @@ export default function App() {
                 ["Missed a game","🏆 Regularity rewarded (default): miss a game = rank 5, worse than last place. 🎯 Skill only: a game only counts if all 4 players played it that day — anyone absent means it's skipped for everyone."],
                 ["No data","If nobody played a game on a given day, it's skipped entirely for everyone."],
                 ["Points","Points accumulate across days. Lower = better. Golf scoring."],
+                ["Avg rank","The big number on each leaderboard card: total points ÷ games counted. Everyone is scored over the same games, so it ranks players exactly like total points, just easier to read (1 = won everything, 5 = missed everything)."],
                 ["Days played","Shown on each player card — useful context since fewer days played = lower raw points regardless of skill."],
               ].map(([title,desc])=>(
                 <div key={title} style={{padding:"14px 16px",borderBottom:"1px solid #f2efe8"}}>
