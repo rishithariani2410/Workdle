@@ -5,6 +5,7 @@ scores across NYT/LinkedIn puzzle games (Wordle, Connections, Tango, Queens,
 Pinpoint, Patches, Zip) and shows leaderboards/trends.
 
 - `src/App.jsx` — the entire app: UI and scoring logic. Imports the data as `SEED_DATA`.
+- `src/FormChart.jsx` — the rolling-form line chart (recharts), lazy-loaded so it stays out of the initial bundle.
 - `src/data.json` — all historical daily results, one day per line.
 - `scripts/update_scores.py` — parses a WhatsApp export into `src/data.json` (implements the methodology below).
 - `src/index.js` — mounts `<App />`.
