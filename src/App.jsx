@@ -47,9 +47,9 @@ function computeTotals(ranks,games,punish=true){
 }
 
 function standings(days,games,punish=true){
-  const pts={},wins={},played={};
+  const pts={},wins={},played={},gp={};
   let slots=0; // game-days counted; the same for every player, so pts/slots is a fair average
-  PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;played[p]=0;});
+  PLAYERS.forEach(p=>{pts[p]=0;wins[p]=0;played[p]=0;gp[p]=0;});
   days.forEach(d=>{
     const{totals,dayRanks,activeGames}=computeTotals(d.ranks,games,punish);
     if(activeGames.length===0)return;
@@ -57,12 +57,14 @@ function standings(days,games,punish=true){
     PLAYERS.forEach(p=>{
       pts[p]+=totals[p];
       // count days player actually participated in at least one active game
-      if(activeGames.some(g=>(d.ranks[g]?.[p]??DEFAULT_RANK)<DEFAULT_RANK))played[p]++;
+      const n=activeGames.filter(g=>(d.ranks[g]?.[p]??DEFAULT_RANK)<DEFAULT_RANK).length;
+      gp[p]+=n;
+      if(n)played[p]++;
     });
     PLAYERS.filter(p=>dayRanks[p]===1).forEach(p=>wins[p]++);
   });
   const sorted=[...PLAYERS].sort((a,b)=>pts[a]-pts[b]);
-  return{pts,wins,played,slots,sorted,ranks:rankTotals(pts)};
+  return{pts,wins,played,gp,slots,sorted,ranks:rankTotals(pts)};
 }
 
 function gamePts(days,game,punish=true){
@@ -276,7 +278,7 @@ button{cursor:pointer;background:none;border:none}
 .seg.sm button{padding:5px 9px;font-size:12px}
 
 /* bottom nav (phones) */
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .bnav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:12px;color:var(--faint);font-size:10.5px;font-weight:600;transition:color .15s}
 .bnav button[aria-current="page"]{color:var(--text)}
 .bnav button[aria-current="page"] .bn-ico{background:var(--accent-soft);color:var(--text)}
@@ -370,7 +372,13 @@ button{cursor:pointer;background:none;border:none}
 .grid-row{border-bottom:1px solid var(--border)}
 .grid-row:last-child{border-bottom:none}
 .grid-row.dim{opacity:.38}
-.gname{display:flex!important;justify-content:flex-start!important;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.grid-row.link{width:100%;text-align:left;transition:background .15s}
+.grid-row.link:hover{background:var(--surface-2)}
+.avg-cell{display:inline-grid;place-items:center;min-width:34px;padding:5px 4px;border-radius:9px;font-family:'Geist Mono',monospace;font-size:12.5px;font-weight:600}
+.avg-cell.best{box-shadow:inset 0 0 0 1.5px currentColor}
+.lb-meta .warn{color:var(--r4fg);font-weight:600}
+.gname{display:flex!important;justify-content:flex-start!important;align-items:center;gap:8px;font-weight:600;font-size:13px;min-width:0}
+.gname b{font-weight:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .date-cell{font-size:12.5px;color:var(--muted);font-weight:500}
 
 #leaderboard{scroll-margin-top:70px}
@@ -382,7 +390,7 @@ button{cursor:pointer;background:none;border:none}
 .round{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;color:var(--text);flex-shrink:0;box-shadow:var(--shadow)}
 .round:disabled{opacity:.35;cursor:default}
 .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-.period{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.period{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
 .stepper{display:flex;align-items:center;gap:8px}
 .stepper .select{flex:1;min-width:0;max-width:260px}
 .round.sm{width:36px;height:36px;border-radius:10px}
@@ -454,8 +462,9 @@ const GameIcon=({g,sz=26})=>(
   <span className="game-ico" style={{background:GAME_COLOR[g],width:sz,height:sz}}>{GAME_ABBR[g]}</span>
 );
 
-// Leaderboard rows. `st` comes from standings() or gamePts().
-function Leaderboard({st,streaks}){
+// Leaderboard rows from standings(). `showPlayed` adds the share of games played
+// (useful in Regularity mode, where each miss counts as a 5).
+function Leaderboard({st,streaks,showPlayed,isDay}){
   const avgs=PLAYERS.map(p=>st.slots?st.pts[p]/st.slots:0);
   const best=Math.min(...avgs),worst=Math.max(...avgs),rng=worst-best||1;
   return(
@@ -473,8 +482,11 @@ function Leaderboard({st,streaks}){
                 {streaks&&streaks[p]>1&&<span className="tag" title={`Won the last ${streaks[p]} days`}>🔥 {streaks[p]}</span>}
               </div>
               <div className="lb-meta">
-                {st.wins&&<>{st.wins[p]} win{st.wins[p]!==1?"s":""} · </>}
-                {st.played[p]} day{st.played[p]!==1?"s":""} · {st.pts[p].toLocaleString("en-GB")} pts
+                {isDay
+                  ?<>{st.pts[p]} pts · played {st.gp[p]} of {st.slots} games</>
+                  :<>{st.wins[p]} day win{st.wins[p]!==1?"s":""} · {showPlayed
+                      ?<span className={st.gp[p]/st.slots<0.8?"warn":""}>played {Math.round(st.gp[p]/st.slots*100)}% of games</span>
+                      :<>{st.played[p]} day{st.played[p]!==1?"s":""}</>}</>}
               </div>
               <div className="lb-bar"><i style={{width:`${width}%`,background:P_COLOR[p]}}/></div>
             </div>
@@ -493,10 +505,13 @@ const FormChart=({data})=>(
 );
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
-const TABS=[["overview","Home","home"],["games","Games","games"],["trends","Trends","trends"],["info","Rules","rules"]];
-// "#daily" was a separate tab; it now opens Home with the latest day selected.
+// Two questions, two tabs: Standings ("who's winning this period?") and
+// Trends ("how is it moving?"). Both share one period picker.
+const TABS=[["overview","Standings","home"],["trends","Trends","trends"],["info","Rules","rules"]];
+// Old links: "#games" opens Trends, "#daily" opens Standings on the latest day.
 const tabFromHash=()=>{
   const h=window.location.hash.slice(1);
+  if(h==="games")return"trends";
   return TABS.some(([v])=>v===h)?h:"overview";
 };
 
@@ -506,8 +521,8 @@ export default function App() {
   const [period,setPeriodState] = useState(()=>window.location.hash==="#daily"
     ?{kind:"day",key:lastDate()}
     :{kind:"month",key:lastDate().slice(0,7)});
-  const [selGame,setGame]  = useState("Wordle");
-  const [showRows,setShowRows] = useState(20);
+  const [scope,setScopeState] = useState("all"); // Trends: "all" or one game
+  const [showRows,setShowRows] = useState(31);
   const [punish,setPunish] = useState(true);
 
   // Keep the open tab in the URL so refresh, back/forward and shared links work.
@@ -526,13 +541,11 @@ export default function App() {
     setTabState(v);
     window.scrollTo(0,0);
   };
-  // Show one day on Home: its standings plus the game-by-game table.
-  const openDay=date=>{
-    setPeriod({kind:"day",key:date});
-    setTab("overview");
-    setTimeout(()=>document.getElementById("leaderboard")?.scrollIntoView({block:"start"}),0);
-  };
-  const openGame=g=>{setGame(g);setShowRows(20);setTab("games");};
+  const setPeriod=p=>{setPeriodState(p);setShowRows(31);};
+  const setScope=s=>{setScopeState(s);setShowRows(31);};
+  // One day on Standings: its leaderboard plus game-by-game ranks.
+  const openDay=date=>{setPeriod({kind:"day",key:date});setTab("overview");};
+  const openTrend=g=>{setScope(g);setTab("trends");};
 
   const allDays = useMemo(()=>SEED_DATA.map(d=>({
     ...d,
@@ -540,99 +553,80 @@ export default function App() {
     all:computeTotals(d.ranks,ALL_GAMES,punish),
   })),[punish]);
 
-
-  // Home
-  // Shared by Home and Games.
-  const yearDays=useMemo(()=>period.kind==="all"?allDays:allDays.filter(d=>periodKey(period.kind,d.date)===period.key),[allDays,period]);
+  // ── period (shared) ──
+  const periodDays=useMemo(()=>period.kind==="all"?allDays:allDays.filter(d=>periodKey(period.kind,d.date)===period.key),[allDays,period]);
   const periodLabel=fmtPeriod(period.kind,period.key);
-  const periodAnchor=yearDays.length?yearDays[yearDays.length-1].date:lastDate();
-  const periodIsCurrent=yearDays.some(d=>d.date===lastDate());
-  const setPeriod=p=>{setPeriodState(p);setShowRows(20);};
-  const yearStats=useMemo(()=>standings(yearDays,LB_GAMES,punish),[yearDays,punish]);
-  const yearGameStats=useMemo(()=>{
+  const periodAnchor=periodDays.length?periodDays[periodDays.length-1].date:lastDate();
+  const periodIsCurrent=periodDays.some(d=>d.date===lastDate());
+  const isDay=period.kind==="day";
+  const dayData=isDay?periodDays[0]:null;
+
+  // ── standings ──
+  const stats=useMemo(()=>standings(periodDays,LB_GAMES,punish),[periodDays,punish]);
+  const gameStats=useMemo(()=>{
     const out={};
-    LB_GAMES.forEach(g=>{out[g]=gamePts(yearDays,g,punish);});
+    LB_GAMES.forEach(g=>{out[g]=gamePts(periodDays,g,punish);});
     return out;
-  },[yearDays,punish]);
+  },[periodDays,punish]);
   const streaks=useMemo(()=>calcStreak(allDays,punish),[allDays,punish]);
   const latestDay=allDays[allDays.length-1];
-  const streakLeader=[...PLAYERS].sort((a,b)=>streaks[b]-streaks[a])[0];
-  const winsLeader=[...PLAYERS].sort((a,b)=>yearStats.wins[b]-yearStats.wins[a])[0];
+  const winners=PLAYERS.filter(p=>latestDay.all.dayRanks[p]===1&&latestDay.all.activeGames.length);
 
-  const dayData=period.kind==="day"?allDays.find(d=>d.date===period.key):null;
-
-  // Games
-  const gameDays=yearDays;
-  const gameStats=useMemo(()=>gamePts(gameDays,selGame,punish),[gameDays,selGame,punish]);
-  const gameDayRows=useMemo(()=>gameDays.filter(d=>gameHasData(d.ranks,selGame)).reverse(),[gameDays,selGame]);
-  const gameSeries=useMemo(()=>rollingSeries(gameDays,[selGame],punish,30),[gameDays,selGame,punish]);
-
-  // Trends
-  // Trends follow the shared period too. The rolling average is computed over all
-  // days and then cut to the period, so a month's line doesn't start cold.
-  const recentDays=useMemo(()=>{
-    const end=allDays.findIndex(d=>d.date===periodAnchor);
-    return allDays.slice(Math.max(0,end-13),end+1);
-  },[allDays,periodAnchor]);
-  const trendAll=useMemo(()=>rollingSeries(allDays,LB_GAMES,punish,14),[allDays,punish]);
-  const trendSeries=useMemo(()=>period.kind==="all"?trendAll
-    :trendAll.filter(r=>periodKey(period.kind,r.date)===period.key),[trendAll,period]);
-  const heatmap=useMemo(()=>{
-    const h={};
-    PLAYERS.forEach(p=>{h[p]={};
-      LB_GAMES.forEach(g=>{
-        let days=yearDays.filter(d=>gameHasData(d.ranks,g));
-        if(!punish)days=days.filter(d=>PLAYERS.every(pp=>(d.ranks[g]?.[pp]??DEFAULT_RANK)<DEFAULT_RANK));
-        h[p][g]=days.length?days.reduce((s,d)=>s+(d.ranks[g]?.[p]??DEFAULT_RANK),0)/days.length:null;
-      });
-    });
-    return h;
-  },[yearDays,punish]);
-  const heatClass=avg=>avg==null?"h0":avg<=1.8?"h1":avg<=2.5?"h2":avg<=3.2?"h3":"h4";
+  // ── trends ──
+  // The rolling average runs over all days and is then cut to the period,
+  // so a short period's line doesn't start cold.
+  const series=useMemo(()=>{
+    const s=rollingSeries(allDays,scope==="all"?LB_GAMES:[scope],punish,14);
+    return period.kind==="all"?s:s.filter(r=>periodKey(period.kind,r.date)===period.key);
+  },[allDays,scope,punish,period]);
+  const resultDays=useMemo(()=>periodDays
+    .filter(d=>scope==="all"?d.lb.activeGames.length>0:gameHasData(d.ranks,scope)).reverse(),[periodDays,scope]);
+  // Rank shown per player per day: the day's overall rank, or "–" if they played none of it.
+  const resultRank=(d,p)=>{
+    if(scope!=="all")return d.ranks[scope]?.[p]??DEFAULT_RANK;
+    const played=d.lb.activeGames.some(g=>(d.ranks[g]?.[p]??DEFAULT_RANK)<DEFAULT_RANK);
+    return played?d.lb.dayRanks[p]:DEFAULT_RANK;
+  };
 
   const modeNote=punish
-    ?"Regularity mode: a missed game counts as 5th place."
-    :"Skill mode: a game only counts on days all four played it.";
+    ?"Regularity: a missed game counts as 5th place."
+    :"Skill: a game only counts on days all four played it.";
+  const heatClass=avg=>avg==null?"h0":avg<=1.8?"h1":avg<=2.5?"h2":avg<=3.2?"h3":"h4";
 
-  // ── shared day views ──
-  const DayStandings=({d})=>{
-    if(d.all.activeGames.length===0)return <div className="empty">No game was played by all four this day, so nothing counts in Skill mode.</div>;
+  // Game × player grid: ranks for a single day, average rank otherwise.
+  const GameGrid=()=>{
+    const cols=stats.sorted;
+    const games=LB_GAMES.filter(g=>isDay?gameHasData(dayData.ranks,g):gameStats[g].days>0);
+    if(games.length===0)return <div className="card empty">No games in this period.</div>;
     return(
-      <div className="standings">
-        {[...PLAYERS].sort((a,b)=>d.all.totals[a]-d.all.totals[b]).map(p=>{
-          const r=d.all.dayRanks[p];
-          const won=d.all.activeGames.filter(g=>d.ranks[g]?.[p]===1).length;
+      <div className="card">
+        <div className="grid-head">
+          <span style={{justifyContent:"flex-start"}}>Game</span>
+          {cols.map(p=><span key={p}><i className="gdot" style={{background:P_COLOR[p]}}/>{p}</span>)}
+        </div>
+        {games.map(g=>{
+          const gs=gameStats[g];
+          const counted=!isDay||dayData.all.activeGames.includes(g);
           return(
-            <div key={p} className={`stand ${r===1?"win":""}`}>
-              <Avatar p={p} sz={34}/>
-              <div className="stand-name">{p}</div>
-              <div className="stand-pts"><span className="mono">{d.all.totals[p]}</span> pts</div>
-              <div className="stand-pts" style={{minHeight:16}}>{won?`🥇 ×${won}`:""}</div>
-            </div>
+            <button key={g} className={`grid-row link ${counted?"":"dim"}`} onClick={()=>openTrend(g)}
+              title={counted?`See ${g} trend`:"Not counted in Skill mode: someone didn't play"}>
+              <span className="gname"><GameIcon g={g} sz={24}/><b>{g}</b></span>
+              {cols.map(p=>{
+                if(isDay)return <span key={p}><Rank r={dayData.ranks[g]?.[p]??DEFAULT_RANK}/></span>;
+                const avg=gs.slots?gs.pts[p]/gs.slots:null;
+                return(
+                  <span key={p}>
+                    <span className={`avg-cell ${heatClass(avg)} ${gs.ranks[p]===1?"best":""}`}
+                      title={`${p}: played ${gs.played[p]} of ${gs.days} days`}>{avg!=null?avg.toFixed(1):"–"}</span>
+                  </span>
+                );
+              })}
+            </button>
           );
         })}
       </div>
     );
   };
-  const Breakdown=({d})=>(
-    <div className="card">
-      <div className="grid-head">
-        <span style={{justifyContent:"flex-start"}}>Game</span>
-        {PLAYERS.map(p=><span key={p}><i className="gdot" style={{background:P_COLOR[p]}}/>{p}</span>)}
-      </div>
-      {ALL_GAMES.filter(g=>gameHasData(d.ranks,g)).map(g=>{
-        const counted=d.all.activeGames.includes(g);
-        return(
-          <div key={g} className={`grid-row ${counted?"":"dim"}`} title={counted?undefined:"Not counted in Skill mode: someone didn't play"}>
-            <span className="gname"><GameIcon g={g} sz={24}/>{g}</span>
-            {PLAYERS.map(p=><span key={p}><Rank r={d.ranks[g]?.[p]??DEFAULT_RANK}/></span>)}
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  const winners=PLAYERS.filter(p=>latestDay.all.dayRanks[p]===1&&latestDay.all.activeGames.length);
 
   return(<>
     <style>{CSS}</style>
@@ -664,194 +658,97 @@ export default function App() {
 
       <main className="main">
 
-        {/* ══ HOME ══ */}
+        {tab!=="info"&&<PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>}
+
+        {/* ══ STANDINGS ══ */}
         {tab==="overview"&&(<>
-          <section className="section card hero">
-            <div className="eyebrow">Latest · {fmtDayLong(latestDay.date)}</div>
-            <div className="hero-title">
-              {winners.length>0&&<span className="hero-avs">{winners.map(p=><Avatar key={p} p={p} sz={34}/>)}</span>}
-              {winners.length>0?winnersText(winners):"No counted games"}
-            </div>
-            <DayStandings d={latestDay}/>
-            <div className="hero-foot">
-              <span className="brand-sub">{latestDay.all.activeGames.length} games counted</span>
-              <button className="btn" onClick={()=>openDay(latestDay.date)}>Game by game <Icon name="arrow" size={15}/></button>
-            </div>
-          </section>
-
-          <section className="section" id="leaderboard">
-            <div className="sec-head">
-              <h2 className="sec-title">Leaderboard</h2>
-              <span className="brand-sub">{periodLabel} · {yearDays.length} day{yearDays.length!==1?"s":""}</span>
-            </div>
-            <PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>
-            <p className="sec-note">{modeNote} Lowest average rank wins.</p>
-            <div className="card"><Leaderboard st={yearStats} streaks={periodIsCurrent&&period.kind!=="day"?streaks:null}/></div>
-          </section>
-
-          {period.kind!=="day"&&<section className="section tiles">
-            <div className="card tile-stat">
-              <div className="tile-k">Current streak</div>
-              {streaks[streakLeader]>0
-                ?<><div className="tile-v"><Avatar p={streakLeader} sz={22}/>{streakLeader}</div>
-                   <div className="tile-s">{streaks[streakLeader]}-day run</div></>
-                :<div className="tile-v">–</div>}
-            </div>
-            <div className="card tile-stat">
-              <div className="tile-k">Most day wins</div>
-              <div className="tile-v"><Avatar p={winsLeader} sz={22}/>{winsLeader}</div>
-              <div className="tile-s">{yearStats.wins[winsLeader]} win{yearStats.wins[winsLeader]!==1?"s":""}</div>
-            </div>
-            <div className="card tile-stat">
-              <div className="tile-k">Days</div>
-              <div className="tile-v mono">{yearDays.length}</div>
-              <div className="tile-s">{period.kind==="all"?`since ${fmtMonth(firstDate().slice(0,7))}`:periodLabel}</div>
-            </div>
-          </section>}
-
-          {dayData?(
-            <section className="section">
-              <div className="sec-head"><h2 className="sec-title">Game by game</h2><span className="brand-sub">{dayData.all.activeGames.length} games counted</span></div>
-              <Breakdown d={dayData}/>
-            </section>
-          ):(
-            <section className="section">
-            <div className="sec-head"><h2 className="sec-title">By game</h2><span className="brand-sub">{periodLabel} · avg rank · tap for details</span></div>
-            <div className="games">
-              {LB_GAMES.map(g=>{
-                const gs=yearGameStats[g];
-                return(
-                  <button key={g} className="card game" onClick={()=>openGame(g)}>
-                    <div className="game-head"><GameIcon g={g}/>{g}</div>
-                    {gs.days===0?<div className="game-row"><span className="n">No data</span></div>:gs.sorted.map(p=>(
-                      <div key={p} className={`game-row ${gs.ranks[p]===1?"first":""}`}>
-                        <i className="gdot" style={{background:P_COLOR[p]}}/>
-                        <span className="n">{p}</span>
-                        <span className="v">{fmtAvg(gs.pts[p],gs.slots)}</span>
-                      </div>
-                    ))}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-          )}
-        </>)}
-
-        {/* ══ GAMES ══ */}
-        {tab==="games"&&(<>
-          <div className="chips">
-            {ALL_GAMES.map(g=>(
-              <button key={g} className="chip-btn" aria-pressed={selGame===g} onClick={()=>{setGame(g);setShowRows(20);}}>
-                <i className="gdot" style={{background:GAME_COLOR[g]}}/>{g}
-              </button>
-            ))}
-          </div>
-          <div className="sec-head">
-            <h1 className="page-title" style={{display:"flex",alignItems:"center",gap:10}}><GameIcon g={selGame} sz={30}/>{selGame}</h1>
-          </div>
-          <PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>
-          <p className="page-sub">{periodLabel} · {gameStats.days} day{gameStats.days!==1?"s":""} played</p>
-          {gameStats.days===0?<div className="card empty">No {selGame} results for this period.</div>:(<>
-            <section className="section card"><Leaderboard st={gameStats}/></section>
-            <section className="section">
-              <div className="sec-head"><h2 className="sec-title">Form</h2><span className="brand-sub">30-day rolling avg rank · higher is better</span></div>
-              <div className="card"><FormChart data={gameSeries}/></div>
-            </section>
-            <section className="section">
-              <div className="sec-head"><h2 className="sec-title">Recent results</h2></div>
-              <div className="card">
-                <div className="grid-head">
-                  <span style={{justifyContent:"flex-start"}}>Date</span>
-                  {PLAYERS.map(p=><span key={p}><i className="gdot" style={{background:P_COLOR[p]}}/>{p}</span>)}
-                </div>
-                {gameDayRows.slice(0,showRows).map(d=>(
-                  <div key={d.date} className="grid-row">
-                    <button className="date-cell" style={{textAlign:"left"}} onClick={()=>openDay(d.date)}>
-                      {period.kind==="all"?fmtDateY(d.date):fmtDate(d.date)}
-                    </button>
-                    {PLAYERS.map(p=><span key={p}><Rank r={d.ranks[selGame]?.[p]??DEFAULT_RANK}/></span>)}
-                  </div>
-                ))}
+          {periodIsCurrent&&!isDay&&(
+            <section className="section card hero">
+              <div className="eyebrow">Latest day · {fmtDayLong(latestDay.date)}</div>
+              <div className="hero-title">
+                {winners.length>0&&<span className="hero-avs">{winners.map(p=><Avatar key={p} p={p} sz={34}/>)}</span>}
+                {winners.length>0?winnersText(winners):"No counted games"}
               </div>
-              {gameDayRows.length>showRows&&(
-                <div style={{textAlign:"center",marginTop:12}}>
-                  <button className="btn ghost" onClick={()=>setShowRows(n=>n+40)}>Show more ({gameDayRows.length-showRows} left)</button>
-                </div>
-              )}
+              <div className="hero-foot" style={{marginTop:0}}>
+                <span className="brand-sub">{latestDay.all.activeGames.length} games counted</span>
+                <button className="btn" onClick={()=>openDay(latestDay.date)}>See the day <Icon name="arrow" size={15}/></button>
+              </div>
             </section>
-          </>)}
+          )}
+
+          <section className="section">
+            <div className="sec-head">
+              <h2 className="sec-title">{isDay?"Day result":"Leaderboard"}</h2>
+              <span className="brand-sub">{periodLabel}{isDay?"":` · ${periodDays.length} day${periodDays.length!==1?"s":""}`}</span>
+            </div>
+            <p className="sec-note">{modeNote} Lowest average rank wins.</p>
+            <div className="card"><Leaderboard st={stats} isDay={isDay} showPlayed={punish}
+              streaks={periodIsCurrent&&!isDay?streaks:null}/></div>
+          </section>
+
+          <section className="section">
+            <div className="sec-head">
+              <h2 className="sec-title">By game</h2>
+              <span className="brand-sub">{isDay?"rank":"avg rank"} · tap a game for its trend</span>
+            </div>
+            <GameGrid/>
+          </section>
         </>)}
 
         {/* ══ TRENDS ══ */}
         {tab==="trends"&&(<>
-          <h1 className="page-title">Trends</h1>
-          <p className="page-sub">{modeNote}</p>
-          <PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>
-          {period.kind!=="day"&&(
-            <section className="section">
-              <div className="sec-head"><h2 className="sec-title">Form over time</h2><span className="brand-sub">{periodLabel}</span></div>
-              <p className="sec-note">14-day rolling average rank across all games. Higher on the chart is better.</p>
-              <div className="card"><FormChart data={trendSeries}/></div>
-            </section>
-          )}
+          <div className="chips" role="group" aria-label="Games">
+            <button className="chip-btn" aria-pressed={scope==="all"} onClick={()=>setScope("all")}>All games</button>
+            {LB_GAMES.map(g=>(
+              <button key={g} className="chip-btn" aria-pressed={scope===g} onClick={()=>setScope(g)}>
+                <i className="gdot" style={{background:GAME_COLOR[g]}}/>{g}
+              </button>
+            ))}
+          </div>
 
           <section className="section">
-            <div className="sec-head"><h2 className="sec-title">Daily ranks</h2><span className="brand-sub">14 days to {fmtDate(periodAnchor)} · tap a day</span></div>
-            <div className="card form">
-              <div className="form-row" style={{gridTemplateColumns:`52px repeat(${recentDays.length},minmax(0,1fr))`}}>
-                <span/>
-                {recentDays.map(d=>(
-                  <span key={d.date} className="form-date" title={fmtDayLong(d.date)}><div>{new Date(d.date+"T12:00:00Z").toLocaleDateString("en-GB",{weekday:"narrow"})}</div><div>{Number(d.date.slice(8))}</div></span>
-                ))}
-              </div>
-              {PLAYERS.map(p=>(
-                <div key={p} className="form-row" style={{gridTemplateColumns:`52px repeat(${recentDays.length},minmax(0,1fr))`}}>
-                  <span className="form-name"><i className="gdot" style={{background:P_COLOR[p]}}/>{p}</span>
-                  {recentDays.map(d=>{
-                    const r=d.lb.activeGames.length?d.lb.dayRanks[p]:DEFAULT_RANK;
-                    return(
-                      <button key={d.date} className={`form-cell rk${r}`} onClick={()=>openDay(d.date)}
-                        title={`${p} · ${fmtDayLong(d.date)} · ${r===5?"no counted games":`rank ${r}`}`}>
-                        {r===5?"–":r}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
+            <div className="sec-head">
+              <h2 className="sec-title">Form</h2>
+              <span className="brand-sub">{scope==="all"?"All games":scope} · {periodLabel}</span>
             </div>
+            {isDay
+              ?<div className="card empty">Pick a month or longer to see form over time.</div>
+              :<>
+                <p className="sec-note">14-day rolling average rank{scope==="all"?" across all games":` in ${scope}`}. Higher is better.{punish?" Missed games count as 5.":""}</p>
+                <div className="card"><FormChart data={series}/></div>
+              </>}
           </section>
 
           <section className="section">
-            <div className="sec-head"><h2 className="sec-title">Game strengths</h2><span className="brand-sub">{periodLabel} · avg rank</span></div>
-            <div className="card">
-              <div className="heat">
-                <div className="heat-row" style={{gridTemplateColumns:`52px repeat(${LB_GAMES.length},minmax(0,1fr))`}}>
-                  <span/>
-                  {LB_GAMES.map(g=>(
-                    <span key={g} style={{display:"grid",placeItems:"center"}} title={g}><GameIcon g={g} sz={24}/></span>
-                  ))}
+            <div className="sec-head">
+              <h2 className="sec-title">Results</h2>
+              <span className="brand-sub">{scope==="all"?"day rank":`${scope} rank`} · newest first · tap a date</span>
+            </div>
+            {resultDays.length===0?<div className="card empty">No results in this period.</div>:<>
+              <div className="card">
+                <div className="grid-head">
+                  <span style={{justifyContent:"flex-start"}}>Date</span>
+                  {stats.sorted.map(p=><span key={p}><i className="gdot" style={{background:P_COLOR[p]}}/>{p}</span>)}
                 </div>
-                {[...PLAYERS].sort((a,b)=>{
-                  const avg=p=>LB_GAMES.reduce((s,g)=>s+(heatmap[p][g]??DEFAULT_RANK),0);
-                  return avg(a)-avg(b);
-                }).map(p=>(
-                  <div key={p} className="heat-row" style={{gridTemplateColumns:`52px repeat(${LB_GAMES.length},minmax(0,1fr))`}}>
-                    <span className="form-name"><i className="gdot" style={{background:P_COLOR[p]}}/>{p}</span>
-                    {LB_GAMES.map(g=>(
-                      <span key={g} className={`heat-cell ${heatClass(heatmap[p][g])}`} title={`${p} · ${g}`}>
-                        {heatmap[p][g]!=null?heatmap[p][g].toFixed(1):"–"}
-                      </span>
-                    ))}
+                {resultDays.slice(0,showRows).map(d=>(
+                  <div key={d.date} className="grid-row">
+                    <button className="date-cell" style={{textAlign:"left"}} onClick={()=>openDay(d.date)}>
+                      {period.kind==="all"||period.kind==="year"?fmtDateY(d.date):fmtDate(d.date)}
+                    </button>
+                    {stats.sorted.map(p=>{
+                      const r=resultRank(d,p);
+                      return <span key={p}><Rank r={r}/></span>;
+                    })}
                   </div>
                 ))}
               </div>
-              <div className="keyrow">
-                {[["h1","≤1.8 strong"],["h2","≤2.5 solid"],["h3","≤3.2 weak"],["h4",">3.2 struggling"]].map(([c,l])=>(
-                  <span key={c}><i className={c}/>{l}</span>
-                ))}
-              </div>
-            </div>
+              {resultDays.length>showRows&&(
+                <div style={{textAlign:"center",marginTop:12}}>
+                  <button className="btn ghost" onClick={()=>setShowRows(n=>n+30)}>Show more ({resultDays.length-showRows} left)</button>
+                </div>
+              )}
+              {scope==="all"&&<p className="sec-note" style={{marginTop:10}}>“–” means they didn’t play that day.</p>}
+            </>}
           </section>
         </>)}
 
@@ -868,6 +765,8 @@ export default function App() {
                 ["Missed a game","Regularity (default): a missed game counts as rank 5, worse than last place. Skill: a game only counts if all four played it that day."],
                 ["No data","If nobody played a game on a given day, it's skipped for everyone."],
                 ["Avg rank","The big number on each leaderboard: total points ÷ games counted. Everyone is scored over the same games, so it orders players exactly like total points, just easier to read (1 = won everything, 5 = missed everything)."],
+                ["Played %","Share of the period's games each player posted a score for. In Regularity mode every missed game counts as a 5, so a low played % drags the average rank (and the Form line) down even if you win the days you play."],
+                ["Form","A 14-day rolling average rank, so one or two missed days stay in the line for two weeks. Switch to Skill mode to see form on played games only."],
               ].map(([t,d])=>(
                 <div key={t} className="rule"><h3>{t}</h3><p>{d}</p></div>
               ))}
