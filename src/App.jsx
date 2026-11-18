@@ -4,12 +4,12 @@ const FormChartLazy = lazy(()=>import("./FormChart"));
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const PLAYERS   = ["Nick","Andy","Yan","Rishi"];
-const ALL_GAMES = ["Wordle","Connections","Tango","Queens","Pinpoint","Patches","Zip"];
+const ALL_GAMES = ["Wordle","Connections","Tango","Queens","Pinpoint","Patches","Zip","Wend"];
 const LB_GAMES  = ALL_GAMES;
 const DEFAULT_RANK = 5;
 
-const GAME_COLOR = {Wordle:"#4ade80",Connections:"#60a5fa",Tango:"#a78bfa",Queens:"#34d399",Pinpoint:"#fbbf24",Patches:"#f472b6",Zip:"#fb923c"};
-const GAME_ABBR  = {Wordle:"W",Connections:"C",Tango:"T",Queens:"Q",Pinpoint:"Pt",Patches:"Pa",Zip:"Z"};
+const GAME_COLOR = {Wordle:"#4ade80",Connections:"#60a5fa",Tango:"#a78bfa",Queens:"#34d399",Pinpoint:"#fbbf24",Patches:"#f472b6",Zip:"#fb923c",Wend:"#22d3ee"};
+const GAME_ABBR  = {Wordle:"W",Connections:"C",Tango:"T",Queens:"Q",Pinpoint:"Pt",Patches:"Pa",Zip:"Z",Wend:"We"};
 const P_COLOR    = {Nick:"#ef4444",Andy:"#3b82f6",Yan:"#8b5cf6",Rishi:"#f59e0b"};
 const P_INIT     = {Nick:"NW",Andy:"AS",Yan:"YJ",Rishi:"R"};
 
@@ -129,7 +129,6 @@ function monthsBetween(from,to){
 }
 
 // ─── DATA COVERAGE ────────────────────────────────────────────────────────────
-const LATEST_YEAR  = lastDate().slice(0,4);
 const DATA_MONTHS  = new Set(SEED_DATA.map(d=>d.date.slice(0,7)));
 const ALL_MONTHS   = monthsBetween(firstDate().slice(0,7),lastDate().slice(0,7));
 const EMPTY_MONTHS = ALL_MONTHS.filter(m=>!DATA_MONTHS.has(m));
@@ -174,6 +173,49 @@ function initialTheme(){
   if(t!=="light"&&t!=="dark")t=window.matchMedia?.("(prefers-color-scheme: dark)").matches?"dark":"light";
   document.documentElement.dataset.theme=t;
   return t;
+}
+
+// ─── PERIODS ──────────────────────────────────────────────────────────────────
+// One period picker drives the leaderboards: a single day, month, quarter, year or all time.
+const PERIOD_KINDS=[["day","Day"],["month","Month"],["quarter","Quarter"],["year","Year"],["all","All time"]];
+function periodKey(kind,date){
+  if(kind==="day")return date;
+  if(kind==="month")return date.slice(0,7);
+  if(kind==="quarter")return`${date.slice(0,4)}-Q${Math.ceil(Number(date.slice(5,7))/3)}`;
+  if(kind==="year")return date.slice(0,4);
+  return"all";
+}
+const PERIOD_KEYS=Object.fromEntries(PERIOD_KINDS.map(([k])=>[k,[...new Set(SEED_DATA.map(d=>periodKey(k,d.date)))]]));
+function fmtPeriod(kind,key){
+  if(kind==="day")return fmtDayLong(key);
+  if(kind==="month")return fmtMonth(key);
+  if(kind==="quarter")return`${key.slice(5)} ${key.slice(0,4)}`;
+  if(kind==="year")return key;
+  return"All time";
+}
+
+// Segmented period type + ‹ select › stepper. `anchor` is the date to keep when switching type.
+function PeriodPicker({period,onChange,anchor}){
+  const keys=PERIOD_KEYS[period.kind];
+  const i=keys.indexOf(period.key);
+  const latest=keys[keys.length-1];
+  const go=key=>onChange({kind:period.kind,key});
+  return(
+    <div className="period">
+      <Segmented label="Period type" small value={period.kind}
+        onChange={k=>onChange({kind:k,key:periodKey(k,anchor)})} options={PERIOD_KINDS}/>
+      {period.kind!=="all"&&(
+        <div className="stepper">
+          <button className="round sm" aria-label="Previous period" disabled={i<=0} onClick={()=>go(keys[i-1])}><Icon name="left" size={18}/></button>
+          <select className="select" value={period.key} onChange={e=>go(e.target.value)} aria-label="Choose period">
+            {[...keys].reverse().map(k=><option key={k} value={k}>{fmtPeriod(period.kind,k)}</option>)}
+          </select>
+          <button className="round sm" aria-label="Next period" disabled={i>=keys.length-1} onClick={()=>go(keys[i+1])}><Icon name="right" size={18}/></button>
+          {period.key!==latest&&<button className="btn ghost sm" onClick={()=>go(latest)}>Latest</button>}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -339,6 +381,11 @@ button{cursor:pointer;background:none;border:none}
 .round{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;color:var(--text);flex-shrink:0;box-shadow:var(--shadow)}
 .round:disabled{opacity:.35;cursor:default}
 .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.period{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper .select{flex:1;min-width:0;max-width:260px}
+.round.sm{width:36px;height:36px;border-radius:10px}
+.btn.sm{padding:7px 11px;font-size:12.5px}
 .select{appearance:none;-webkit-appearance:none;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--border);border-radius:10px;padding:8px 34px 8px 12px;font-weight:600;font-size:13px;box-shadow:var(--shadow)}
 
 /* charts */
@@ -454,11 +501,10 @@ const tabFromHash=()=>{
 export default function App() {
   const [tab,setTabState]  = useState(tabFromHash);
   const [theme,setTheme]   = useState(initialTheme);
-  const [yearFilt,setYear] = useState("all");
+  const [period,setPeriodState] = useState(()=>({kind:"month",key:lastDate().slice(0,7)}));
   const [selDate,setSelDate] = useState(lastDate);
   const month = selDate.slice(0,7);
   const [selGame,setGame]  = useState("Wordle");
-  const [gameYear,setGameYear] = useState("all");
   const [showRows,setShowRows] = useState(20);
   const [trendRange,setTrendRange] = useState("90");
   const [punish,setPunish] = useState(true);
@@ -488,12 +534,15 @@ export default function App() {
     all:computeTotals(d.ranks,ALL_GAMES,punish),
   })),[punish]);
 
-  const years = useMemo(()=>["all",...[...new Set(SEED_DATA.map(d=>d.date.slice(0,4)))].sort().reverse()],[]);
-  const yearOpts = years.map(y=>[y,y==="all"?"All time":y]);
   const dataMonths = useMemo(()=>ALL_MONTHS.filter(m=>DATA_MONTHS.has(m)).reverse(),[]);
 
   // Home
-  const yearDays=useMemo(()=>yearFilt==="all"?allDays:allDays.filter(d=>d.date.startsWith(yearFilt)),[allDays,yearFilt]);
+  // Shared by Home and Games.
+  const yearDays=useMemo(()=>period.kind==="all"?allDays:allDays.filter(d=>periodKey(period.kind,d.date)===period.key),[allDays,period]);
+  const periodLabel=fmtPeriod(period.kind,period.key);
+  const periodAnchor=yearDays.length?yearDays[yearDays.length-1].date:lastDate();
+  const periodIsCurrent=yearDays.some(d=>d.date===lastDate());
+  const setPeriod=p=>{setPeriodState(p);setShowRows(20);};
   const yearStats=useMemo(()=>standings(yearDays,LB_GAMES,punish),[yearDays,punish]);
   const yearGameStats=useMemo(()=>{
     const out={};
@@ -507,13 +556,12 @@ export default function App() {
 
   // Daily
   const monthDays=useMemo(()=>allDays.filter(d=>d.date.startsWith(month)),[allDays,month]);
-  const monthStats=useMemo(()=>standings(monthDays,ALL_GAMES,punish),[monthDays,punish]);
   const selIdx=allDays.findIndex(d=>d.date===selDate);
   const selDayData=allDays[selIdx];
   const pickMonth=m=>{const ds=allDays.filter(d=>d.date.startsWith(m));setSelDate(ds[ds.length-1].date);};
 
   // Games
-  const gameDays=useMemo(()=>gameYear==="all"?allDays:allDays.filter(d=>d.date.startsWith(gameYear)),[allDays,gameYear]);
+  const gameDays=yearDays;
   const gameStats=useMemo(()=>gamePts(gameDays,selGame,punish),[gameDays,selGame,punish]);
   const gameDayRows=useMemo(()=>gameDays.filter(d=>gameHasData(d.ranks,selGame)).reverse(),[gameDays,selGame]);
   const gameSeries=useMemo(()=>rollingSeries(gameDays,[selGame],punish,30),[gameDays,selGame,punish]);
@@ -629,10 +677,11 @@ export default function App() {
           <section className="section">
             <div className="sec-head">
               <h2 className="sec-title">Leaderboard</h2>
-              <Segmented label="Period" small value={yearFilt} onChange={setYear} options={yearOpts}/>
+              <span className="brand-sub">{periodLabel} · {yearDays.length} day{yearDays.length!==1?"s":""}</span>
             </div>
+            <PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>
             <p className="sec-note">{modeNote} Lowest average rank wins.</p>
-            <div className="card"><Leaderboard st={yearStats} streaks={yearFilt==="all"||yearFilt===LATEST_YEAR?streaks:null}/></div>
+            <div className="card"><Leaderboard st={yearStats} streaks={periodIsCurrent&&period.kind!=="day"?streaks:null}/></div>
           </section>
 
           <section className="section tiles">
@@ -651,12 +700,12 @@ export default function App() {
             <div className="card tile-stat">
               <div className="tile-k">Days</div>
               <div className="tile-v mono">{yearDays.length}</div>
-              <div className="tile-s">{yearFilt==="all"?`since ${fmtMonth(firstDate().slice(0,7))}`:yearFilt}</div>
+              <div className="tile-s">{period.kind==="all"?`since ${fmtMonth(firstDate().slice(0,7))}`:periodLabel}</div>
             </div>
           </section>
 
           <section className="section">
-            <div className="sec-head"><h2 className="sec-title">By game</h2><span className="brand-sub">avg rank · tap for details</span></div>
+            <div className="sec-head"><h2 className="sec-title">By game</h2><span className="brand-sub">{periodLabel} · avg rank · tap for details</span></div>
             <div className="games">
               {LB_GAMES.map(g=>{
                 const gs=yearGameStats[g];
@@ -696,13 +745,14 @@ export default function App() {
           <section className="section card pad"><DayStandings d={selDayData}/></section>
           <section className="section"><Breakdown d={selDayData}/></section>
           <section className="section">
-            <div className="sec-head"><h2 className="sec-title">{fmtMonth(month)} standings</h2><span className="brand-sub">{monthDays.length} days</span></div>
+            <div className="sec-head"><h2 className="sec-title">Other days in {fmtMonth(month)}</h2>
+              <button className="btn ghost sm" onClick={()=>{setPeriod({kind:"month",key:month});setTab("overview");}}>{fmtMonth(month)} leaderboard</button>
+            </div>
             <div className="chips">
               {[...monthDays].reverse().map(d=>(
                 <button key={d.date} className="chip-btn" aria-pressed={selDate===d.date} onClick={()=>setSelDate(d.date)}>{fmtDate(d.date)}</button>
               ))}
             </div>
-            <div className="card"><Leaderboard st={monthStats}/></div>
           </section>
         </>)}
 
@@ -717,9 +767,9 @@ export default function App() {
           </div>
           <div className="sec-head">
             <h1 className="page-title" style={{display:"flex",alignItems:"center",gap:10}}><GameIcon g={selGame} sz={30}/>{selGame}</h1>
-            <Segmented label="Period" small value={gameYear} onChange={v=>{setGameYear(v);setShowRows(20);}} options={yearOpts}/>
           </div>
-          <p className="page-sub">{gameStats.days} days played{gameYear==="all"?"":` in ${gameYear}`}</p>
+          <PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>
+          <p className="page-sub">{periodLabel} · {gameStats.days} day{gameStats.days!==1?"s":""} played</p>
           {gameStats.days===0?<div className="card empty">No {selGame} results for this period.</div>:(<>
             <section className="section card"><Leaderboard st={gameStats}/></section>
             <section className="section">
@@ -736,7 +786,7 @@ export default function App() {
                 {gameDayRows.slice(0,showRows).map(d=>(
                   <div key={d.date} className="grid-row">
                     <button className="date-cell" style={{textAlign:"left"}} onClick={()=>openDay(d.date)}>
-                      {gameYear==="all"?fmtDateY(d.date):fmtDate(d.date)}
+                      {period.kind==="all"?fmtDateY(d.date):fmtDate(d.date)}
                     </button>
                     {PLAYERS.map(p=><span key={p}><Rank r={d.ranks[selGame]?.[p]??DEFAULT_RANK}/></span>)}
                   </div>
@@ -853,6 +903,7 @@ export default function App() {
                 ["Pinpoint","Guess the category from clues. Score = guesses (1–5). Fail = 6."],
                 ["Patches","Sewing puzzle. Score = time in seconds."],
                 ["Zip","Connect the dots. Score = time in seconds."],
+                ["Wend","LinkedIn puzzle, tracked from Aug 2026. Score = time in seconds."],
               ].map(([g,d])=>(
                 <div key={g} className="rule"><h3><GameIcon g={g} sz={22}/>{g}</h3><p>{d}</p></div>
               ))}

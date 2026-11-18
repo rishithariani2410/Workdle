@@ -26,12 +26,12 @@ NAME_MAP = {
     "Rishi": "Rishi",
 }
 PLAYERS = ["Nick", "Andy", "Yan", "Rishi"]
-GAMES = ["Wordle", "Connections", "Tango", "Queens", "Pinpoint", "Patches", "Zip"]
+GAMES = ["Wordle", "Connections", "Tango", "Queens", "Pinpoint", "Patches", "Zip", "Wend"]
 MISSED = 5
 
 MSG_START = re.compile(r'^\[(\d{2})/(\d{2})/(\d{4}), \d{2}:\d{2}:\d{2}\] ([^:]+): (.*)$')
 WORDLE_RE = re.compile(r'Wordle\s+([\d,]+)\s+([1-6X])/6')
-TIME_GAME_RE = re.compile(r'\b(Tango|Queens|Zip|Patches)\s*#\s*(\d+)[^\n]*\|\s*(\d+):(\d{2})')
+TIME_GAME_RE = re.compile(r'\b(Tango|Queens|Zip|Patches|Wend)\s*#\s*(\d+)[^\n]*\|\s*(\d+):(\d{2})')
 PINPOINT_HDR_RE = re.compile(r'Pinpoint\s*#\s*(\d+)')
 PINPOINT_GUESSES_RE = re.compile(r'Pinpoint\s*#\s*\d+[^\n]*\|\s*(\d+)\s*guess')
 PINPOINT_PIN_RE = re.compile(r'Pinpoint\s*#\s*\d+[^\n]*\|\s*(\d)\s*📌')  # "Pinpoint #815 | 5 📌"

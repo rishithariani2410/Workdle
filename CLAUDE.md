@@ -2,7 +2,7 @@
 
 A single-page React app (`react-scripts`) that tracks a friend group's daily
 scores across NYT/LinkedIn puzzle games (Wordle, Connections, Tango, Queens,
-Pinpoint, Patches, Zip) and shows leaderboards/trends.
+Pinpoint, Patches, Zip, Wend) and shows leaderboards/trends.
 
 - `src/App.jsx` — the entire app: UI and scoring logic. Imports the data as `SEED_DATA`.
 - `src/FormChart.jsx` — the rolling-form line chart (recharts), lazy-loaded so it stays out of the initial bundle.
@@ -43,7 +43,7 @@ rules, change the script and this file together.
 **Message format**: `[DD/MM/YYYY, HH:MM:SS] Sender Name: message text`
 Split the file into multiline messages via this header regex, then process each message individually.
 
-**Assigning a message to the correct day**: do NOT just use the message's own send-date. Players occasionally post a result just after midnight (e.g. `00:11`) for the *previous* day's puzzle — using the raw send-date would misattribute it to the wrong day (and silently make it look like they missed that day). Every game (Wordle, Connections, Tango, Queens, Pinpoint, Patches, Zip) publishes exactly one puzzle per calendar day with a ticking `#N` puzzle number, so puzzle number and calendar day are perfectly correlated. For each game: compute `offset = mode(send_date.toordinal() - puzzle_number)` across all of that game's messages in the file, then take each message's canonical day as `date.fromordinal(offset + puzzle_number)` rather than its literal send-date. The mode self-corrects for the rare after-midnight straggler as long as most players post same-day.
+**Assigning a message to the correct day**: do NOT just use the message's own send-date. Players occasionally post a result just after midnight (e.g. `00:11`) for the *previous* day's puzzle — using the raw send-date would misattribute it to the wrong day (and silently make it look like they missed that day). Every game (Wordle, Connections, Tango, Queens, Pinpoint, Patches, Zip, Wend) publishes exactly one puzzle per calendar day with a ticking `#N` puzzle number, so puzzle number and calendar day are perfectly correlated. For each game: compute `offset = mode(send_date.toordinal() - puzzle_number)` across all of that game's messages in the file, then take each message's canonical day as `date.fromordinal(offset + puzzle_number)` rather than its literal send-date. The mode self-corrects for the rare after-midnight straggler as long as most players post same-day.
 
 **Player name mapping**
 
@@ -60,7 +60,7 @@ Ignore all other senders (other group members not tracked in the leaderboard).
 
 - **Wordle** — regex `Wordle [\d,]+ (\d|X)/6\*?`. Score = guesses (1–6), `X` = 7 (fail). Trailing `*` (hard mode) treated identically.
 - **Connections** — count all lines matching `^[🟨🟩🟦🟪]{4}$` (attempt rows). Count solid-colour rows (all 4 emoji identical) = successful group solves. If solid rows < 4 → failed to complete → score = **8**. Otherwise score = 4 + (total rows − solid rows), i.e. 4 = perfect, 7 = 3 mistakes. Lower is better.
-- **Tango / Queens / Patches / Zip** — regex `GameName #\d+ \| (\d+):(\d+)`. Convert MM:SS to total seconds. Lower is better.
+- **Tango / Queens / Patches / Zip / Wend** — regex `GameName #\d+ \| (\d+):(\d+)`. Convert MM:SS to total seconds. Lower is better.
 - **Pinpoint** — try `| N guess` pattern first, then `| N 📌` (e.g. `Pinpoint #815 | 5 📌`), then `(N/5)`, then count 🤔 emojis before 📌 (solved on Nth guess; the script warns when it falls back to this). If `Pinpoint #` present but no 📌 anywhere → fail = **6**. Score range 1–5, fail = 6. Lower is better.
 
 ### Ranking Logic
@@ -102,7 +102,8 @@ Only ranks (1–5) are stored — no raw scores.
     "Queens":      {"Nick": 1, "Andy": 3, "Yan": 2, "Rishi": 4},
     "Pinpoint":    {"Nick": 2, "Andy": 1, "Yan": 3, "Rishi": 5},
     "Patches":     {"Nick": 1, "Andy": 2, "Yan": 3, "Rishi": 4},
-    "Zip":         {"Nick": 3, "Andy": 1, "Yan": 2, "Rishi": 4}
+    "Zip":         {"Nick": 3, "Andy": 1, "Yan": 2, "Rishi": 4},
+    "Wend":        {"Nick": 2, "Andy": 1, "Yan": 5, "Rishi": 3}
   }
 }
 ```
@@ -143,6 +144,7 @@ Only ranks (1–5) are stored — no raw scores.
 | Pinpoint | Guesses (1–5) | Lower better | Fail = 6 |
 | Patches | Seconds | Lower better | LinkedIn puzzle |
 | Zip | Seconds | Lower better | LinkedIn puzzle |
+| Wend | Seconds | Lower better | LinkedIn puzzle; tracked from 21 Aug 2026 (earlier days have no `Wend` key) |
 
 ### File locations
 
