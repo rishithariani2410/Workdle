@@ -276,7 +276,7 @@ button{cursor:pointer;background:none;border:none}
 .seg.sm button{padding:5px 9px;font-size:12px}
 
 /* bottom nav (phones) */
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .bnav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:12px;color:var(--faint);font-size:10.5px;font-weight:600;transition:color .15s}
 .bnav button[aria-current="page"]{color:var(--text)}
 .bnav button[aria-current="page"] .bn-ico{background:var(--accent-soft);color:var(--text)}
@@ -373,6 +373,7 @@ button{cursor:pointer;background:none;border:none}
 .gname{display:flex!important;justify-content:flex-start!important;align-items:center;gap:8px;font-weight:600;font-size:13px}
 .date-cell{font-size:12.5px;color:var(--muted);font-weight:500}
 
+#leaderboard{scroll-margin-top:70px}
 /* daily header */
 .day-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .day-title{flex:1;min-width:0}
@@ -473,7 +474,7 @@ function Leaderboard({st,streaks}){
               </div>
               <div className="lb-meta">
                 {st.wins&&<>{st.wins[p]} win{st.wins[p]!==1?"s":""} · </>}
-                {st.played[p]} days · {st.pts[p].toLocaleString("en-GB")} pts
+                {st.played[p]} day{st.played[p]!==1?"s":""} · {st.pts[p].toLocaleString("en-GB")} pts
               </div>
               <div className="lb-bar"><i style={{width:`${width}%`,background:P_COLOR[p]}}/></div>
             </div>
@@ -492,7 +493,8 @@ const FormChart=({data})=>(
 );
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
-const TABS=[["overview","Home","home"],["daily","Daily","calendar"],["games","Games","games"],["trends","Trends","trends"],["info","Rules","rules"]];
+const TABS=[["overview","Home","home"],["games","Games","games"],["trends","Trends","trends"],["info","Rules","rules"]];
+// "#daily" was a separate tab; it now opens Home with the latest day selected.
 const tabFromHash=()=>{
   const h=window.location.hash.slice(1);
   return TABS.some(([v])=>v===h)?h:"overview";
@@ -501,12 +503,11 @@ const tabFromHash=()=>{
 export default function App() {
   const [tab,setTabState]  = useState(tabFromHash);
   const [theme,setTheme]   = useState(initialTheme);
-  const [period,setPeriodState] = useState(()=>({kind:"month",key:lastDate().slice(0,7)}));
-  const [selDate,setSelDate] = useState(lastDate);
-  const month = selDate.slice(0,7);
+  const [period,setPeriodState] = useState(()=>window.location.hash==="#daily"
+    ?{kind:"day",key:lastDate()}
+    :{kind:"month",key:lastDate().slice(0,7)});
   const [selGame,setGame]  = useState("Wordle");
   const [showRows,setShowRows] = useState(20);
-  const [trendRange,setTrendRange] = useState("90");
   const [punish,setPunish] = useState(true);
 
   // Keep the open tab in the URL so refresh, back/forward and shared links work.
@@ -525,7 +526,12 @@ export default function App() {
     setTabState(v);
     window.scrollTo(0,0);
   };
-  const openDay=date=>{setSelDate(date);setTab("daily");};
+  // Show one day on Home: its standings plus the game-by-game table.
+  const openDay=date=>{
+    setPeriod({kind:"day",key:date});
+    setTab("overview");
+    setTimeout(()=>document.getElementById("leaderboard")?.scrollIntoView({block:"start"}),0);
+  };
   const openGame=g=>{setGame(g);setShowRows(20);setTab("games");};
 
   const allDays = useMemo(()=>SEED_DATA.map(d=>({
@@ -534,7 +540,6 @@ export default function App() {
     all:computeTotals(d.ranks,ALL_GAMES,punish),
   })),[punish]);
 
-  const dataMonths = useMemo(()=>ALL_MONTHS.filter(m=>DATA_MONTHS.has(m)).reverse(),[]);
 
   // Home
   // Shared by Home and Games.
@@ -554,11 +559,7 @@ export default function App() {
   const streakLeader=[...PLAYERS].sort((a,b)=>streaks[b]-streaks[a])[0];
   const winsLeader=[...PLAYERS].sort((a,b)=>yearStats.wins[b]-yearStats.wins[a])[0];
 
-  // Daily
-  const monthDays=useMemo(()=>allDays.filter(d=>d.date.startsWith(month)),[allDays,month]);
-  const selIdx=allDays.findIndex(d=>d.date===selDate);
-  const selDayData=allDays[selIdx];
-  const pickMonth=m=>{const ds=allDays.filter(d=>d.date.startsWith(m));setSelDate(ds[ds.length-1].date);};
+  const dayData=period.kind==="day"?allDays.find(d=>d.date===period.key):null;
 
   // Games
   const gameDays=yearDays;
@@ -567,22 +568,26 @@ export default function App() {
   const gameSeries=useMemo(()=>rollingSeries(gameDays,[selGame],punish,30),[gameDays,selGame,punish]);
 
   // Trends
-  const recentDays=useMemo(()=>allDays.slice(-14),[allDays]);
-  const trendSeries=useMemo(()=>{
-    const s=rollingSeries(allDays,LB_GAMES,punish,14);
-    return trendRange==="all"?s:s.slice(-Number(trendRange));
-  },[allDays,punish,trendRange]);
+  // Trends follow the shared period too. The rolling average is computed over all
+  // days and then cut to the period, so a month's line doesn't start cold.
+  const recentDays=useMemo(()=>{
+    const end=allDays.findIndex(d=>d.date===periodAnchor);
+    return allDays.slice(Math.max(0,end-13),end+1);
+  },[allDays,periodAnchor]);
+  const trendAll=useMemo(()=>rollingSeries(allDays,LB_GAMES,punish,14),[allDays,punish]);
+  const trendSeries=useMemo(()=>period.kind==="all"?trendAll
+    :trendAll.filter(r=>periodKey(period.kind,r.date)===period.key),[trendAll,period]);
   const heatmap=useMemo(()=>{
     const h={};
     PLAYERS.forEach(p=>{h[p]={};
       LB_GAMES.forEach(g=>{
-        let days=allDays.filter(d=>gameHasData(d.ranks,g));
+        let days=yearDays.filter(d=>gameHasData(d.ranks,g));
         if(!punish)days=days.filter(d=>PLAYERS.every(pp=>(d.ranks[g]?.[pp]??DEFAULT_RANK)<DEFAULT_RANK));
         h[p][g]=days.length?days.reduce((s,d)=>s+(d.ranks[g]?.[p]??DEFAULT_RANK),0)/days.length:null;
       });
     });
     return h;
-  },[allDays,punish]);
+  },[yearDays,punish]);
   const heatClass=avg=>avg==null?"h0":avg<=1.8?"h1":avg<=2.5?"h2":avg<=3.2?"h3":"h4";
 
   const modeNote=punish
@@ -674,7 +679,7 @@ export default function App() {
             </div>
           </section>
 
-          <section className="section">
+          <section className="section" id="leaderboard">
             <div className="sec-head">
               <h2 className="sec-title">Leaderboard</h2>
               <span className="brand-sub">{periodLabel} · {yearDays.length} day{yearDays.length!==1?"s":""}</span>
@@ -684,7 +689,7 @@ export default function App() {
             <div className="card"><Leaderboard st={yearStats} streaks={periodIsCurrent&&period.kind!=="day"?streaks:null}/></div>
           </section>
 
-          <section className="section tiles">
+          {period.kind!=="day"&&<section className="section tiles">
             <div className="card tile-stat">
               <div className="tile-k">Current streak</div>
               {streaks[streakLeader]>0
@@ -695,16 +700,22 @@ export default function App() {
             <div className="card tile-stat">
               <div className="tile-k">Most day wins</div>
               <div className="tile-v"><Avatar p={winsLeader} sz={22}/>{winsLeader}</div>
-              <div className="tile-s">{yearStats.wins[winsLeader]} wins</div>
+              <div className="tile-s">{yearStats.wins[winsLeader]} win{yearStats.wins[winsLeader]!==1?"s":""}</div>
             </div>
             <div className="card tile-stat">
               <div className="tile-k">Days</div>
               <div className="tile-v mono">{yearDays.length}</div>
               <div className="tile-s">{period.kind==="all"?`since ${fmtMonth(firstDate().slice(0,7))}`:periodLabel}</div>
             </div>
-          </section>
+          </section>}
 
-          <section className="section">
+          {dayData?(
+            <section className="section">
+              <div className="sec-head"><h2 className="sec-title">Game by game</h2><span className="brand-sub">{dayData.all.activeGames.length} games counted</span></div>
+              <Breakdown d={dayData}/>
+            </section>
+          ):(
+            <section className="section">
             <div className="sec-head"><h2 className="sec-title">By game</h2><span className="brand-sub">{periodLabel} · avg rank · tap for details</span></div>
             <div className="games">
               {LB_GAMES.map(g=>{
@@ -724,36 +735,7 @@ export default function App() {
               })}
             </div>
           </section>
-        </>)}
-
-        {/* ══ DAILY ══ */}
-        {tab==="daily"&&(<>
-          <div className="toolbar">
-            <select className="select" value={month} onChange={e=>pickMonth(e.target.value)} aria-label="Month">
-              {dataMonths.map(m=><option key={m} value={m}>{fmtMonth(m)}</option>)}
-            </select>
-            {selDate!==lastDate()&&<button className="btn ghost" onClick={()=>setSelDate(lastDate())}>Jump to latest</button>}
-          </div>
-          <div className="day-head">
-            <button className="round" aria-label="Previous day" disabled={selIdx<=0} onClick={()=>setSelDate(allDays[selIdx-1].date)}><Icon name="left"/></button>
-            <div className="day-title">
-              <h2>{fmtDayLong(selDayData.date)}</h2>
-              <p>{selDayData.all.activeGames.length} games counted{selDayData.date===lastDate()?" · latest":""}</p>
-            </div>
-            <button className="round" aria-label="Next day" disabled={selIdx>=allDays.length-1} onClick={()=>setSelDate(allDays[selIdx+1].date)}><Icon name="right"/></button>
-          </div>
-          <section className="section card pad"><DayStandings d={selDayData}/></section>
-          <section className="section"><Breakdown d={selDayData}/></section>
-          <section className="section">
-            <div className="sec-head"><h2 className="sec-title">Other days in {fmtMonth(month)}</h2>
-              <button className="btn ghost sm" onClick={()=>{setPeriod({kind:"month",key:month});setTab("overview");}}>{fmtMonth(month)} leaderboard</button>
-            </div>
-            <div className="chips">
-              {[...monthDays].reverse().map(d=>(
-                <button key={d.date} className="chip-btn" aria-pressed={selDate===d.date} onClick={()=>setSelDate(d.date)}>{fmtDate(d.date)}</button>
-              ))}
-            </div>
-          </section>
+          )}
         </>)}
 
         {/* ══ GAMES ══ */}
@@ -805,18 +787,17 @@ export default function App() {
         {tab==="trends"&&(<>
           <h1 className="page-title">Trends</h1>
           <p className="page-sub">{modeNote}</p>
-          <section className="section">
-            <div className="sec-head">
-              <h2 className="sec-title">Form over time</h2>
-              <Segmented label="Range" small value={trendRange} onChange={setTrendRange}
-                options={[["90","90 days"],["365","1 year"],["all","All"]]}/>
-            </div>
-            <p className="sec-note">14-day rolling average rank across all games. Higher on the chart is better.</p>
-            <div className="card"><FormChart data={trendSeries}/></div>
-          </section>
+          <PeriodPicker period={period} onChange={setPeriod} anchor={periodAnchor}/>
+          {period.kind!=="day"&&(
+            <section className="section">
+              <div className="sec-head"><h2 className="sec-title">Form over time</h2><span className="brand-sub">{periodLabel}</span></div>
+              <p className="sec-note">14-day rolling average rank across all games. Higher on the chart is better.</p>
+              <div className="card"><FormChart data={trendSeries}/></div>
+            </section>
+          )}
 
           <section className="section">
-            <div className="sec-head"><h2 className="sec-title">Last 14 days</h2><span className="brand-sub">daily rank · tap a day</span></div>
+            <div className="sec-head"><h2 className="sec-title">Daily ranks</h2><span className="brand-sub">14 days to {fmtDate(periodAnchor)} · tap a day</span></div>
             <div className="card form">
               <div className="form-row" style={{gridTemplateColumns:`52px repeat(${recentDays.length},minmax(0,1fr))`}}>
                 <span/>
@@ -842,7 +823,7 @@ export default function App() {
           </section>
 
           <section className="section">
-            <div className="sec-head"><h2 className="sec-title">Game strengths</h2><span className="brand-sub">all-time avg rank</span></div>
+            <div className="sec-head"><h2 className="sec-title">Game strengths</h2><span className="brand-sub">{periodLabel} · avg rank</span></div>
             <div className="card">
               <div className="heat">
                 <div className="heat-row" style={{gridTemplateColumns:`52px repeat(${LB_GAMES.length},minmax(0,1fr))`}}>
